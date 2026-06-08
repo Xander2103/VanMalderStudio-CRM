@@ -25,6 +25,10 @@ export class Payments implements OnInit {
   generateMessage = '';
   showCreateForm = false;
 
+  reminderCopiedId: number | null = null;
+  fallbackText = '';
+  fallbackPaymentId: number | null = null;
+
   selectedMonth = new Date().getMonth() + 1;
   selectedYear = new Date().getFullYear();
   selectedStatusFilter: number | null = null;
@@ -169,6 +173,47 @@ export class Payments implements OnInit {
         this.isSaving = false;
       }
     });
+  }
+
+  generateReminderText(payment: ClientPayment): string {
+    const monthName = this.monthNames[payment.month - 1];
+    const amount = new Intl.NumberFormat('nl-BE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(payment.amount);
+    const dueDate = this.formatDate(payment.dueDate);
+
+    return (
+      `Dag ${payment.clientCompanyName},\n\n` +
+      `Ik stuur u even een korte herinnering voor de maandelijkse onderhoudskost van ${monthName} ${payment.year}.\n\n` +
+      `Bedrag: € ${amount}\n` +
+      `Vervaldatum: ${dueDate}\n\n` +
+      `Alvast bedankt!\n\n` +
+      `Xander\n` +
+      `Van Malder Studio`
+    );
+  }
+
+  copyReminder(payment: ClientPayment): void {
+    const text = this.generateReminderText(payment);
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.reminderCopiedId = payment.id;
+        this.fallbackPaymentId = null;
+        setTimeout(() => {
+          if (this.reminderCopiedId === payment.id) {
+            this.reminderCopiedId = null;
+          }
+        }, 3000);
+      }).catch(() => {
+        this.fallbackText = text;
+        this.fallbackPaymentId = payment.id;
+      });
+    } else {
+      this.fallbackText = text;
+      this.fallbackPaymentId = payment.id;
+    }
   }
 
   getStatusLabel(status: number): string {

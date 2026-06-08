@@ -212,13 +212,28 @@
 
               <td>
                 @if (payment.status !== 2) {
-                  <button
-                    class="payments-table__mark-paid"
-                    type="button"
-                    (click)="markPaid(payment.id)"
-                  >
-                    Markeer betaald
-                  </button>
+                  <div class="payments-table__action-group">
+                    <button
+                      class="payments-table__mark-paid"
+                      type="button"
+                      (click)="markPaid(payment.id)"
+                    >
+                      Markeer betaald
+                    </button>
+                    <button
+                      class="payments-table__copy-reminder"
+                      type="button"
+                      (click)="copyReminder(payment)"
+                    >
+                      Reminder kopiëren
+                    </button>
+                  </div>
+                }
+                @if (reminderCopiedId === payment.id) {
+                  <p class="payments-table__copied-msg">Remindertekst gekopieerd.</p>
+                }
+                @if (fallbackPaymentId === payment.id) {
+                  <textarea class="payments-table__fallback" readonly rows="6">{{ fallbackText }}</textarea>
                 }
               </td>
             </tr>
