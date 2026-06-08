@@ -20,3 +20,5 @@ describe('LeadDetail', () => {
     expect(component).toBeTruthy();
   });
 });
+
+

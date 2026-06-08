@@ -127,3 +127,17 @@ VanMalderStudio.CRM
     ├── src/app/services
     ├── src/app/app.routes.ts
     └── src/app/app.config.ts
+
+    ## Screenshots
+
+### Dashboard
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Leads
+![Leads](docs/screenshots/leads.png)
+
+### Lead Detail
+![Lead Detail](docs/screenshots/lead-detail.png)
+
+### Tasks
+![Tasks](docs/screenshots/tasks.png)
