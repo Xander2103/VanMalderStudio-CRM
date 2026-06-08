@@ -221,7 +221,7 @@
           @for (client of filteredClients; track client.id) {
             <tr>
               <td>
-                <strong>{{ client.companyName }}</strong>
+                <a class="client-link client-link--name" [routerLink]="['/clients', client.id]">{{ client.companyName }}</a>
                 @if (client.website) {
                   <span>
                     <a class="client-link" [href]="client.website" target="_blank" rel="noopener">

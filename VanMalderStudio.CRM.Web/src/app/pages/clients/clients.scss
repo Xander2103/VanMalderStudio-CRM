@@ -270,6 +270,16 @@
   text-decoration: underline;
 }
 
+.client-link--name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #162033;
+}
+
+.client-link--name:hover {
+  color: #5267ff;
+}
+
 @media (max-width: 640px) {
   .clients-page {
     padding: 1rem;

@@ -5,6 +5,7 @@ import { LeadDetail } from './pages/lead-detail/lead-detail';
 import { Tasks } from './pages/tasks/tasks';
 import { Clients } from './pages/clients/clients';
 import { Payments } from './pages/payments/payments';
+import { ClientDetail } from './pages/client-detail/client-detail';
 
 export const routes: Routes = [
   {
@@ -26,6 +27,10 @@ export const routes: Routes = [
   {
     path: 'clients',
     component: Clients
+  },
+  {
+    path: 'clients/:id',
+    component: ClientDetail
   },
   {
     path: 'payments',

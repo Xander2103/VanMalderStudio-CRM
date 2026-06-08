@@ -1,0 +1,242 @@
+<section class="client-detail-page">
+
+  @if (isLoading) {
+    <p class="client-detail-page__state">Klant laden...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="client-detail-page__error">{{ errorMessage }}</p>
+  }
+
+  @if (!isLoading && client) {
+    <header class="client-detail-page__header">
+      <a class="client-detail-page__back" routerLink="/clients">← Terug naar klanten</a>
+
+      <div>
+        <p class="client-detail-page__eyebrow">Klant</p>
+        <h1>{{ client.companyName }}</h1>
+      </div>
+    </header>
+
+    <div class="client-detail-grid">
+
+      <!-- Contactgegevens -->
+      <article class="client-card">
+        <h2 class="client-card__title">Contactgegevens</h2>
+        <dl>
+          <div>
+            <dt>Contactpersoon</dt>
+            <dd>{{ client.contactName || '-' }}</dd>
+          </div>
+          <div>
+            <dt>E-mail</dt>
+            <dd>
+              @if (client.email) {
+                <a class="client-detail-page__link" href="mailto:{{ client.email }}">{{ client.email }}</a>
+              } @else {
+                -
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Telefoon</dt>
+            <dd>{{ client.phone || '-' }}</dd>
+          </div>
+          <div>
+            <dt>Website</dt>
+            <dd>
+              @if (client.website) {
+                <a class="client-detail-page__link" [href]="client.website" target="_blank" rel="noopener">
+                  {{ client.website }} ↗
+                </a>
+              } @else {
+                -
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Klant sinds</dt>
+            <dd>{{ formatDate(client.createdAt) }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <!-- Zakelijk -->
+      <article class="client-card">
+        <h2 class="client-card__title">Zakelijk</h2>
+        <dl>
+          <div>
+            <dt>Websiteprijs</dt>
+            <dd>{{ formatEuro(client.websitePrice) }}</dd>
+          </div>
+          <div>
+            <dt>Maandelijks onderhoud</dt>
+            <dd>{{ formatEuro(client.monthlyMaintenanceFee) }}</dd>
+          </div>
+          <div>
+            <dt>Betaald bedrag</dt>
+            <dd>{{ formatEuro(client.amountPaid) }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <!-- Hosting / Server -->
+      <article class="client-card">
+        <h2 class="client-card__title">Hosting / Server</h2>
+        <dl>
+          <div>
+            <dt>Server IP-adres</dt>
+            <dd>{{ client.serverIpAddress || '-' }}</dd>
+          </div>
+          <div>
+            <dt>SSH-gebruikersnaam</dt>
+            <dd>{{ client.sshUsername || '-' }}</dd>
+          </div>
+          <div>
+            <dt>Hosting provider</dt>
+            <dd>{{ client.hostingProvider || '-' }}</dd>
+          </div>
+          <div>
+            <dt>Hosting plan</dt>
+            <dd>{{ client.hostingPlan || '-' }}</dd>
+          </div>
+          <div>
+            <dt>Beheer portaal</dt>
+            <dd>
+              @if (client.hostingManagementUrl) {
+                <a class="client-detail-page__link" [href]="client.hostingManagementUrl" target="_blank" rel="noopener">
+                  Portaal openen ↗
+                </a>
+              } @else {
+                -
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Hosting verlengingsdatum</dt>
+            <dd>{{ formatDate(client.hostingRenewalDate) }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <!-- Domein -->
+      <article class="client-card">
+        <h2 class="client-card__title">Domein</h2>
+        <dl>
+          <div>
+            <dt>Domeinnaam</dt>
+            <dd>{{ client.domainName || '-' }}</dd>
+          </div>
+          <div>
+            <dt>Registrar</dt>
+            <dd>{{ client.domainRegistrar || '-' }}</dd>
+          </div>
+          <div>
+            <dt>Beheer portaal</dt>
+            <dd>
+              @if (client.domainManagementUrl) {
+                <a class="client-detail-page__link" [href]="client.domainManagementUrl" target="_blank" rel="noopener">
+                  Portaal openen ↗
+                </a>
+              } @else {
+                -
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Domein verlengingsdatum</dt>
+            <dd>{{ formatDate(client.domainRenewalDate) }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <!-- Notities -->
+      @if (client.notes) {
+        <article class="client-card client-card--full">
+          <h2 class="client-card__title">Notities</h2>
+          <p class="client-card__notes">{{ client.notes }}</p>
+        </article>
+      }
+
+    </div>
+
+    <!-- Betalingen -->
+    <section class="cd-payments">
+      <h2 class="cd-payments__title">Betalingen</h2>
+
+      @if (paymentsErrorMessage) {
+        <p class="cd-payments__error">{{ paymentsErrorMessage }}</p>
+      }
+
+      <!-- Summary -->
+      <div class="cd-payments-summary">
+        <div class="cd-summary-card cd-summary-card--paid">
+          <span>Betaald</span>
+          <strong>{{ formatEuro(totalPaid) }}</strong>
+          <small>Ontvangen</small>
+        </div>
+        <div class="cd-summary-card cd-summary-card--outstanding">
+          <span>Openstaand</span>
+          <strong>{{ formatEuro(totalOutstanding) }}</strong>
+          <small>Nog te ontvangen</small>
+        </div>
+        <div class="cd-summary-card cd-summary-card--pending">
+          <span>Te betalen</span>
+          <strong>{{ pendingCount }}</strong>
+          <small>Openstaande betalingen</small>
+        </div>
+      </div>
+
+      @if (payments.length === 0) {
+        <p class="cd-payments__empty">Geen betalingen gevonden voor deze klant.</p>
+      }
+
+      @if (payments.length > 0) {
+        <div class="cd-payments-table-wrapper">
+          <table class="cd-payments-table">
+            <thead>
+              <tr>
+                <th>Periode</th>
+                <th>Bedrag</th>
+                <th>Status</th>
+                <th>Vervaldatum</th>
+                <th>Betaald op</th>
+                <th>Notities</th>
+                <th>Actie</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (payment of payments; track payment.id) {
+                <tr>
+                  <td>{{ monthNames[payment.month - 1] }} {{ payment.year }}</td>
+                  <td>{{ formatEuro(payment.amount) }}</td>
+                  <td>
+                    <span [class]="getStatusClass(payment.status)">
+                      {{ getStatusLabel(payment.status) }}
+                    </span>
+                  </td>
+                  <td>{{ formatDate(payment.dueDate) }}</td>
+                  <td>{{ formatDate(payment.paidAt) }}</td>
+                  <td>{{ payment.notes || '-' }}</td>
+                  <td>
+                    @if (payment.status !== 2) {
+                      <button
+                        class="cd-payments-table__mark-paid"
+                        type="button"
+                        (click)="markPaid(payment.id)"
+                      >
+                        Markeer betaald
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+  }
+
+</section>
