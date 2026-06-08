@@ -1,4 +1,4 @@
-# VanMalderStudio.CRM
+# VanMalderStudio.CRM (Screenshots --> Docs/screenshots ) 
 
 A full-stack CRM and lead management application built with **ASP.NET Core Web API**, **Angular**, **Entity Framework Core** and **SQL Server**.
 
