@@ -15,4 +15,5 @@ public class ApplicationDbContext : DbContext
     public DbSet<TaskItem> TaskItems => Set<TaskItem>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<ClientPayment> ClientPayments => Set<ClientPayment>();
+    public DbSet<ClientProject> ClientProjects => Set<ClientProject>();
 }

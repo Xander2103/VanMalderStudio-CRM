@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin, catchError, of } from 'rxjs';
 import { Client, ClientService, UpdateClient } from '../../services/client.service';
 import { ClientPayment, ClientPaymentService } from '../../services/client-payment.service';
+import { ClientProject, ClientProjectService, CreateClientProject } from '../../services/client-project.service';
 
 @Component({
   selector: 'app-client-detail',
@@ -14,6 +15,7 @@ import { ClientPayment, ClientPaymentService } from '../../services/client-payme
 export class ClientDetail implements OnInit {
   client?: Client;
   payments: ClientPayment[] = [];
+  projects: ClientProject[] = [];
 
   isLoading = true;
   isEditing = false;
@@ -21,8 +23,12 @@ export class ClientDetail implements OnInit {
   errorMessage = '';
   successMessage = '';
   paymentsErrorMessage = '';
+  projectsErrorMessage = '';
+  showProjectForm = false;
+  isSavingProject = false;
 
   editForm: UpdateClient = { companyName: '' };
+  newProject: CreateClientProject = { clientId: 0, projectName: '', projectType: 1, status: 1 };
 
   private clientId = 0;
 
@@ -34,7 +40,8 @@ export class ClientDetail implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private clientService: ClientService,
-    private clientPaymentService: ClientPaymentService
+    private clientPaymentService: ClientPaymentService,
+    private clientProjectService: ClientProjectService
   ) {}
 
   ngOnInit(): void {
@@ -47,14 +54,17 @@ export class ClientDetail implements OnInit {
     }
 
     this.clientId = id;
+    this.newProject.clientId = id;
 
     forkJoin({
       client: this.clientService.getClient(id),
-      payments: this.clientPaymentService.getPaymentsByClient(id).pipe(catchError(() => of([])))
+      payments: this.clientPaymentService.getPaymentsByClient(id).pipe(catchError(() => of([]))),
+      projects: this.clientProjectService.getProjectsByClient(id).pipe(catchError(() => of([])))
     }).subscribe({
-      next: ({ client, payments }) => {
+      next: ({ client, payments, projects }) => {
         this.client = client;
         this.payments = payments;
+        this.projects = projects;
         this.isLoading = false;
       },
       error: () => {
@@ -63,6 +73,8 @@ export class ClientDetail implements OnInit {
       }
     });
   }
+
+  // ── Client edit ────────────────────────────────────────────────────────────
 
   startEdit(): void {
     if (!this.client) return;
@@ -129,6 +141,8 @@ export class ClientDetail implements OnInit {
     });
   }
 
+  // ── Payments ───────────────────────────────────────────────────────────────
+
   loadPayments(): void {
     this.clientPaymentService.getPaymentsByClient(this.clientId).subscribe({
       next: (data) => { this.payments = data; },
@@ -175,6 +189,101 @@ export class ClientDetail implements OnInit {
       default: return 'cd-payment-status';
     }
   }
+
+  // ── Projects ───────────────────────────────────────────────────────────────
+
+  loadProjects(): void {
+    this.clientProjectService.getProjectsByClient(this.clientId).subscribe({
+      next: (data) => { this.projects = data; },
+      error: () => { this.projectsErrorMessage = 'Projecten konden niet geladen worden.'; }
+    });
+  }
+
+  toggleProjectForm(): void {
+    this.showProjectForm = !this.showProjectForm;
+    this.projectsErrorMessage = '';
+    if (this.showProjectForm) {
+      this.newProject = { clientId: this.clientId, projectName: '', projectType: 1, status: 1 };
+    }
+  }
+
+  createProject(): void {
+    if (!this.newProject.projectName.trim()) {
+      this.projectsErrorMessage = 'Projectnaam is verplicht.';
+      return;
+    }
+
+    this.isSavingProject = true;
+    this.projectsErrorMessage = '';
+
+    const payload: CreateClientProject = {
+      ...this.newProject,
+      startDate: this.newProject.startDate || null,
+      deadline: this.newProject.deadline || null,
+    };
+
+    this.clientProjectService.createProject(payload).subscribe({
+      next: () => {
+        this.showProjectForm = false;
+        this.isSavingProject = false;
+        this.loadProjects();
+      },
+      error: () => {
+        this.projectsErrorMessage = 'Project kon niet aangemaakt worden.';
+        this.isSavingProject = false;
+      }
+    });
+  }
+
+  getProjectTypeLabel(type: number): string {
+    switch (type) {
+      case 1: return 'Website';
+      case 2: return 'Webshop';
+      case 3: return 'Redesign';
+      case 4: return 'Maintenance';
+      case 5: return 'SEO';
+      case 6: return 'Other';
+      default: return 'Onbekend';
+    }
+  }
+
+  getProjectTypeClass(type: number): string {
+    switch (type) {
+      case 1: return 'cd-project-type cd-project-type--website';
+      case 2: return 'cd-project-type cd-project-type--webshop';
+      case 3: return 'cd-project-type cd-project-type--redesign';
+      case 4: return 'cd-project-type cd-project-type--maintenance';
+      case 5: return 'cd-project-type cd-project-type--seo';
+      case 6: return 'cd-project-type cd-project-type--other';
+      default: return 'cd-project-type cd-project-type--other';
+    }
+  }
+
+  getProjectStatusLabel(status: number): string {
+    switch (status) {
+      case 1: return 'Planned';
+      case 2: return 'In progress';
+      case 3: return 'Waiting for feedback';
+      case 4: return 'Completed';
+      case 5: return 'On hold';
+      case 6: return 'Cancelled';
+      default: return 'Onbekend';
+    }
+  }
+
+  getProjectStatusClass(status: number): string {
+    switch (status) {
+      case 1: return 'cd-project-status cd-project-status--planned';
+      case 2: return 'cd-project-status cd-project-status--inprogress';
+      case 3: return 'cd-project-status cd-project-status--waiting';
+      case 4: return 'cd-project-status cd-project-status--completed';
+      case 5: return 'cd-project-status cd-project-status--onhold';
+      case 6: return 'cd-project-status cd-project-status--cancelled';
+      default: return 'cd-project-status';
+    }
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
 
   private toDateInputValue(dateString?: string | null): string {
     if (!dateString) return '';
