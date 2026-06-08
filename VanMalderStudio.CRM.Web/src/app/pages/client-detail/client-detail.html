@@ -398,55 +398,141 @@
         <div class="cd-projects-grid">
           @for (project of projects; track project.id) {
             <article class="cd-project-card">
-              <div class="cd-project-card__header">
-                <h3 class="cd-project-card__title">{{ project.projectName }}</h3>
-                <div class="cd-project-card__badges">
-                  <span [class]="getProjectTypeClass(project.projectType)">
-                    {{ getProjectTypeLabel(project.projectType) }}
-                  </span>
-                  <span [class]="getProjectStatusClass(project.status)">
-                    {{ getProjectStatusLabel(project.status) }}
-                  </span>
-                </div>
-              </div>
+              @if (editingProjectId === project.id) {
 
-              <dl class="cd-project-card__meta">
-                <div>
-                  <dt>Prijs</dt>
-                  <dd>{{ formatEuro(project.price) }}</dd>
+                <!-- Edit mode -->
+                <div class="cd-edit-fields">
+                  <label class="cd-edit-label cd-edit-label--full">
+                    Projectnaam *
+                    <input type="text" name="editProjectName" [(ngModel)]="projectEditForm.projectName"
+                      placeholder="bv. Nieuwe website" required />
+                  </label>
+                  <label class="cd-edit-label">
+                    Type
+                    <select name="editProjectType" [(ngModel)]="projectEditForm.projectType">
+                      <option [ngValue]="1">Website</option>
+                      <option [ngValue]="2">Webshop</option>
+                      <option [ngValue]="3">Redesign</option>
+                      <option [ngValue]="4">Maintenance</option>
+                      <option [ngValue]="5">SEO</option>
+                      <option [ngValue]="6">Other</option>
+                    </select>
+                  </label>
+                  <label class="cd-edit-label">
+                    Status
+                    <select name="editProjectStatus" [(ngModel)]="projectEditForm.status">
+                      <option [ngValue]="1">Planned</option>
+                      <option [ngValue]="2">In progress</option>
+                      <option [ngValue]="3">Waiting for feedback</option>
+                      <option [ngValue]="4">Completed</option>
+                      <option [ngValue]="5">On hold</option>
+                      <option [ngValue]="6">Cancelled</option>
+                    </select>
+                  </label>
+                  <label class="cd-edit-label">
+                    Prijs (€)
+                    <input type="number" name="editPrice" [(ngModel)]="projectEditForm.price" min="0" />
+                  </label>
+                  <label class="cd-edit-label">
+                    Startdatum
+                    <input type="date" name="editStartDate" [(ngModel)]="projectEditForm.startDate" />
+                  </label>
+                  <label class="cd-edit-label">
+                    Deadline
+                    <input type="date" name="editDeadline" [(ngModel)]="projectEditForm.deadline" />
+                  </label>
+                  <label class="cd-edit-label">
+                    Live URL
+                    <input type="url" name="editLiveUrl" [(ngModel)]="projectEditForm.liveUrl"
+                      placeholder="https://..." />
+                  </label>
+                  <label class="cd-edit-label">
+                    Preview URL
+                    <input type="url" name="editPreviewUrl" [(ngModel)]="projectEditForm.previewUrl"
+                      placeholder="https://..." />
+                  </label>
+                  <label class="cd-edit-label">
+                    GitHub repo URL
+                    <input type="url" name="editGitHubRepoUrl" [(ngModel)]="projectEditForm.gitHubRepoUrl"
+                      placeholder="https://github.com/..." />
+                  </label>
+                  <label class="cd-edit-label cd-edit-label--full">
+                    Notities
+                    <textarea name="editProjectNotes" [(ngModel)]="projectEditForm.notes" rows="3"
+                      placeholder="Optionele opmerkingen..."></textarea>
+                  </label>
                 </div>
-                <div>
-                  <dt>Startdatum</dt>
-                  <dd>{{ formatDate(project.startDate) }}</dd>
-                </div>
-                <div>
-                  <dt>Deadline</dt>
-                  <dd>{{ formatDate(project.deadline) }}</dd>
-                </div>
-              </dl>
 
-              @if (project.liveUrl || project.previewUrl || project.gitHubRepoUrl) {
-                <div class="cd-project-card__links">
-                  @if (project.liveUrl) {
-                    <a class="cd-project-card__link" [href]="project.liveUrl" target="_blank" rel="noopener">
-                      Live ↗
-                    </a>
-                  }
-                  @if (project.previewUrl) {
-                    <a class="cd-project-card__link" [href]="project.previewUrl" target="_blank" rel="noopener">
-                      Preview ↗
-                    </a>
-                  }
-                  @if (project.gitHubRepoUrl) {
-                    <a class="cd-project-card__link" [href]="project.gitHubRepoUrl" target="_blank" rel="noopener">
-                      GitHub ↗
-                    </a>
-                  }
+                <div class="cd-project-card__edit-footer">
+                  <button class="cd-btn cd-btn--ghost" type="button"
+                    (click)="cancelProjectEdit()" [disabled]="isSavingProjectEdit">
+                    Annuleren
+                  </button>
+                  <button class="cd-btn cd-btn--primary" type="button"
+                    (click)="saveProjectEdit(project.id)" [disabled]="isSavingProjectEdit">
+                    @if (isSavingProjectEdit) { Opslaan... } @else { Opslaan }
+                  </button>
                 </div>
-              }
 
-              @if (project.notes) {
-                <p class="cd-project-card__notes">{{ project.notes }}</p>
+              } @else {
+
+                <!-- Read-only mode -->
+                <div class="cd-project-card__header">
+                  <div class="cd-project-card__header-top">
+                    <h3 class="cd-project-card__title">{{ project.projectName }}</h3>
+                    <button class="cd-project-card__edit-btn" type="button" (click)="startProjectEdit(project)">
+                      Bewerken
+                    </button>
+                  </div>
+                  <div class="cd-project-card__badges">
+                    <span [class]="getProjectTypeClass(project.projectType)">
+                      {{ getProjectTypeLabel(project.projectType) }}
+                    </span>
+                    <span [class]="getProjectStatusClass(project.status)">
+                      {{ getProjectStatusLabel(project.status) }}
+                    </span>
+                  </div>
+                </div>
+
+                <dl class="cd-project-card__meta">
+                  <div>
+                    <dt>Prijs</dt>
+                    <dd>{{ formatEuro(project.price) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Startdatum</dt>
+                    <dd>{{ formatDate(project.startDate) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Deadline</dt>
+                    <dd>{{ formatDate(project.deadline) }}</dd>
+                  </div>
+                </dl>
+
+                @if (project.liveUrl || project.previewUrl || project.gitHubRepoUrl) {
+                  <div class="cd-project-card__links">
+                    @if (project.liveUrl) {
+                      <a class="cd-project-card__link" [href]="project.liveUrl" target="_blank" rel="noopener">
+                        Live ↗
+                      </a>
+                    }
+                    @if (project.previewUrl) {
+                      <a class="cd-project-card__link" [href]="project.previewUrl" target="_blank" rel="noopener">
+                        Preview ↗
+                      </a>
+                    }
+                    @if (project.gitHubRepoUrl) {
+                      <a class="cd-project-card__link" [href]="project.gitHubRepoUrl" target="_blank" rel="noopener">
+                        GitHub ↗
+                      </a>
+                    }
+                  </div>
+                }
+
+                @if (project.notes) {
+                  <p class="cd-project-card__notes">{{ project.notes }}</p>
+                }
+
               }
             </article>
           }

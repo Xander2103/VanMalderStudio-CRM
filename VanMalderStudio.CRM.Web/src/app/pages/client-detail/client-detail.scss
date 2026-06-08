@@ -483,11 +483,44 @@
   margin-bottom: 0.75rem;
 }
 
+.cd-project-card__header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
 .cd-project-card__title {
-  margin: 0 0 0.6rem;
+  margin: 0;
   font-size: 1rem;
   font-weight: 800;
   color: #162033;
+}
+
+.cd-project-card__edit-btn {
+  flex-shrink: 0;
+  padding: 0.3rem 0.75rem;
+  border: 1.5px solid #dde3f0;
+  border-radius: 999px;
+  background: transparent;
+  color: #63708a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.cd-project-card__edit-btn:hover {
+  border-color: #5267ff;
+  color: #5267ff;
+}
+
+.cd-project-card__edit-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .cd-project-card__badges {

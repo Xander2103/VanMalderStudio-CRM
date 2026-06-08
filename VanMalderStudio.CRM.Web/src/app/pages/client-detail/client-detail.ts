@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin, catchError, of } from 'rxjs';
 import { Client, ClientService, UpdateClient } from '../../services/client.service';
 import { ClientPayment, ClientPaymentService } from '../../services/client-payment.service';
-import { ClientProject, ClientProjectService, CreateClientProject } from '../../services/client-project.service';
+import { ClientProject, ClientProjectService, CreateClientProject, UpdateClientProject } from '../../services/client-project.service';
 
 @Component({
   selector: 'app-client-detail',
@@ -26,9 +26,12 @@ export class ClientDetail implements OnInit {
   projectsErrorMessage = '';
   showProjectForm = false;
   isSavingProject = false;
+  editingProjectId: number | null = null;
+  isSavingProjectEdit = false;
 
   editForm: UpdateClient = { companyName: '' };
   newProject: CreateClientProject = { clientId: 0, projectName: '', projectType: 1, status: 1 };
+  projectEditForm: UpdateClientProject = { projectName: '', projectType: 1, status: 1 };
 
   private clientId = 0;
 
@@ -231,6 +234,63 @@ export class ClientDetail implements OnInit {
       error: () => {
         this.projectsErrorMessage = 'Project kon niet aangemaakt worden.';
         this.isSavingProject = false;
+      }
+    });
+  }
+
+  startProjectEdit(project: ClientProject): void {
+    this.editingProjectId = project.id;
+    this.projectEditForm = {
+      projectName: project.projectName,
+      projectType: project.projectType,
+      status: project.status,
+      price: project.price,
+      startDate: this.toDateInputValue(project.startDate),
+      deadline: this.toDateInputValue(project.deadline),
+      liveUrl: project.liveUrl ?? undefined,
+      previewUrl: project.previewUrl ?? undefined,
+      gitHubRepoUrl: project.gitHubRepoUrl ?? undefined,
+      notes: project.notes ?? undefined,
+    };
+    this.projectsErrorMessage = '';
+  }
+
+  cancelProjectEdit(): void {
+    this.editingProjectId = null;
+    this.projectsErrorMessage = '';
+  }
+
+  saveProjectEdit(projectId: number): void {
+    if (!this.projectEditForm.projectName.trim()) {
+      this.projectsErrorMessage = 'Projectnaam is verplicht.';
+      return;
+    }
+
+    this.isSavingProjectEdit = true;
+    this.projectsErrorMessage = '';
+
+    const payload: UpdateClientProject = {
+      ...this.projectEditForm,
+      startDate: this.projectEditForm.startDate || null,
+      deadline: this.projectEditForm.deadline || null,
+    };
+
+    this.clientProjectService.updateProject(projectId, payload).subscribe({
+      next: () => {
+        const idx = this.projects.findIndex((p) => p.id === projectId);
+        if (idx !== -1) {
+          this.projects[idx] = {
+            ...this.projects[idx],
+            ...payload,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        this.editingProjectId = null;
+        this.isSavingProjectEdit = false;
+      },
+      error: () => {
+        this.projectsErrorMessage = 'Project kon niet opgeslagen worden.';
+        this.isSavingProjectEdit = false;
       }
     });
   }
