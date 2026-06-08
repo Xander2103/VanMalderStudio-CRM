@@ -408,6 +408,95 @@
   text-decoration: underline;
 }
 
+// ── Renewal alerts ────────────────────────────────────────────────────────────
+
+.renewal-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 0.75rem;
+}
+
+.renewal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  background: #f9fbff;
+  border: 1px solid #edf0f6;
+  color: #162033;
+  text-decoration: none;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.renewal-row:hover {
+  background: #eef1ff;
+  border-color: #c5ceff;
+}
+
+.renewal-row__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.renewal-row__body strong {
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.renewal-row__label {
+  font-size: 0.8rem;
+  color: #63708a;
+}
+
+.renewal-row__aside {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.renewal-row__aside time {
+  font-size: 0.78rem;
+  color: #63708a;
+  white-space: nowrap;
+}
+
+.renewal-badge {
+  display: inline-block;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.renewal-badge--hosting {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.renewal-badge--domain {
+  background: #f3e5f5;
+  color: #4a148c;
+}
+
+.renewal-days {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #63708a;
+  white-space: nowrap;
+}
+
+.renewal-days--urgent {
+  color: #a40000;
+}
+
 @media (max-width: 950px) {
   .dashboard {
     padding: 1rem;
@@ -420,7 +509,8 @@
   .quick-actions,
   .stats-grid,
   .value-grid,
-  .dashboard-section--split {
+  .dashboard-section--split,
+  .renewal-list {
     grid-template-columns: 1fr;
   }
 }

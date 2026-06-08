@@ -5,6 +5,16 @@ import { catchError } from 'rxjs/operators';
 import { DashboardService, DashboardSummary } from '../../services/dashboard.service';
 import { Lead, LeadService } from '../../services/lead.service';
 import { TaskItem, TaskService } from '../../services/task.service';
+import { Client, ClientService } from '../../services/client.service';
+
+interface RenewalAlert {
+  clientId: number;
+  companyName: string;
+  type: 'Hosting' | 'Domein';
+  label: string;
+  renewalDate: string;
+  daysRemaining: number;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +26,7 @@ export class Dashboard implements OnInit {
   summary?: DashboardSummary;
   dueTodayTasks: TaskItem[] = [];
   warmLeads: Lead[] = [];
+  renewalAlerts: RenewalAlert[] = [];
 
   openPipelineValue = 0;
   proposalSentValue = 0;
@@ -28,14 +39,16 @@ export class Dashboard implements OnInit {
   constructor(
     private dashboardService: DashboardService,
     private leadService: LeadService,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private clientService: ClientService
   ) {}
 
   ngOnInit(): void {
     forkJoin({
       summary: this.dashboardService.getSummary(),
       tasks: this.taskService.getTasks().pipe(catchError(() => of([]))),
-      leads: this.leadService.getLeads().pipe(catchError(() => of([])))
+      leads: this.leadService.getLeads().pipe(catchError(() => of([]))),
+      clients: this.clientService.getClients().pipe(catchError(() => of([] as Client[])))
     }).subscribe({
       next: (data) => {
         this.summary = data.summary;
@@ -75,6 +88,47 @@ export class Dashboard implements OnInit {
           const prob = l.winProbability != null ? l.winProbability / 100 : 1;
           return sum + value * prob;
         }, 0);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const cutoff = new Date(today);
+        cutoff.setDate(cutoff.getDate() + 30);
+
+        const alerts: RenewalAlert[] = [];
+        for (const client of data.clients) {
+          if (client.hostingRenewalDate) {
+            const d = new Date(client.hostingRenewalDate);
+            d.setHours(0, 0, 0, 0);
+            if (d >= today && d <= cutoff) {
+              alerts.push({
+                clientId: client.id,
+                companyName: client.companyName,
+                type: 'Hosting',
+                label: client.hostingProvider || 'Hosting',
+                renewalDate: client.hostingRenewalDate,
+                daysRemaining: Math.round((d.getTime() - today.getTime()) / 86400000)
+              });
+            }
+          }
+          if (client.domainRenewalDate) {
+            const d = new Date(client.domainRenewalDate);
+            d.setHours(0, 0, 0, 0);
+            if (d >= today && d <= cutoff) {
+              alerts.push({
+                clientId: client.id,
+                companyName: client.companyName,
+                type: 'Domein',
+                label: client.domainName || 'Domein',
+                renewalDate: client.domainRenewalDate,
+                daysRemaining: Math.round((d.getTime() - today.getTime()) / 86400000)
+              });
+            }
+          }
+        }
+
+        this.renewalAlerts = alerts
+          .sort((a, b) => new Date(a.renewalDate).getTime() - new Date(b.renewalDate).getTime())
+          .slice(0, 6);
 
         this.isLoading = false;
       },

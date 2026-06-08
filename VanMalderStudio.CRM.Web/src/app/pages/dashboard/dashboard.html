@@ -229,5 +229,42 @@
         <a routerLink="/leads" class="action-footer-link">Alle leads bekijken →</a>
       </article>
     </section>
+
+    <section class="dashboard-section">
+      <div class="section-heading">
+        <div>
+          <p class="dashboard-hero__eyebrow">Beheer</p>
+          <h2>Vervalt binnenkort</h2>
+        </div>
+      </div>
+
+      @if (renewalAlerts.length === 0) {
+        <p class="action-empty">Geen vervaldatums binnen 30 dagen.</p>
+      }
+
+      @if (renewalAlerts.length > 0) {
+        <div class="renewal-list">
+          @for (alert of renewalAlerts; track $index) {
+            <a [routerLink]="['/clients', alert.clientId]" class="renewal-row">
+              <div class="renewal-row__body">
+                <strong>{{ alert.companyName }}</strong>
+                <span class="renewal-row__label">{{ alert.label }}</span>
+              </div>
+              <div class="renewal-row__aside">
+                <span [class]="alert.type === 'Hosting' ? 'renewal-badge renewal-badge--hosting' : 'renewal-badge renewal-badge--domain'">
+                  {{ alert.type }}
+                </span>
+                <time>{{ formatDate(alert.renewalDate) }}</time>
+                <span [class]="alert.daysRemaining <= 7 ? 'renewal-days renewal-days--urgent' : 'renewal-days'">
+                  {{ alert.daysRemaining }} dag{{ alert.daysRemaining === 1 ? '' : 'en' }}
+                </span>
+              </div>
+            </a>
+          }
+        </div>
+      }
+
+      <a routerLink="/clients" class="action-footer-link">Alle klanten bekijken →</a>
+    </section>
   }
 </section>
