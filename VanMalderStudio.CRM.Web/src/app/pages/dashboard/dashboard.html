@@ -1,0 +1,177 @@
+<section class="dashboard">
+  <header class="dashboard-hero">
+    <div>
+      <p class="dashboard-hero__eyebrow">Van Malder Studio CRM</p>
+      <h1>Dashboard</h1>
+      <p>
+        Volg leads, taken en commerciële opvolgingen op vanuit één overzicht.
+      </p>
+    </div>
+
+    <div class="dashboard-hero__actions">
+      <a routerLink="/leads" class="button button--primary">Leads bekijken</a>
+      <a routerLink="/leads" class="button button--secondary">Nieuwe lead</a>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Dashboard laden...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="dashboard__error">{{ errorMessage }}</p>
+  }
+
+  @if (summary) {
+    <section class="quick-actions">
+      <a routerLink="/leads" class="quick-action">
+        <span>Leads</span>
+        <strong>Bekijk alle leads</strong>
+        <small>Open je volledige leadlijst</small>
+      </a>
+
+      <a routerLink="/leads" [queryParams]="{ status: 2 }" class="quick-action">
+        <span>Opvolging</span>
+        <strong>{{ summary.calledNoAnswerLeads }} niet opgenomen</strong>
+        <small>Leads die je opnieuw moet contacteren</small>
+      </a>
+
+      <a routerLink="/leads" [queryParams]="{ status: 4 }" class="quick-action">
+        <span>Sales</span>
+        <strong>{{ summary.interestedLeads }} geïnteresseerd</strong>
+        <small>Leads met hogere kans op offerte</small>
+      </a>
+    </section>
+
+    <section class="dashboard-section">
+      <div class="section-heading">
+        <div>
+          <p class="dashboard-hero__eyebrow">Overzicht</p>
+          <h2>Lead pipeline</h2>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <a routerLink="/leads" class="stat-card stat-card--large">
+          <span>Total leads</span>
+          <strong>{{ summary.totalLeads }}</strong>
+          <small>Alle prospects in je CRM</small>
+        </a>
+
+        <a
+          routerLink="/leads"
+          [queryParams]="{ status: 1 }"
+          class="stat-card"
+        >
+          <span>Nieuwe leads</span>
+          <strong>{{ summary.newLeads }}</strong>
+          <small>Nog niet opgevolgd</small>
+        </a>
+
+        <a
+          routerLink="/leads"
+          [queryParams]="{ status: 2 }"
+          class="stat-card"
+        >
+          <span>Niet opgenomen</span>
+          <strong>{{ summary.calledNoAnswerLeads }}</strong>
+          <small>Opnieuw bellen</small>
+        </a>
+
+        <a
+          routerLink="/leads"
+          [queryParams]="{ status: 4 }"
+          class="stat-card"
+        >
+          <span>Geïnteresseerd</span>
+          <strong>{{ summary.interestedLeads }}</strong>
+          <small>Warme leads</small>
+        </a>
+
+        <a
+          routerLink="/leads"
+          [queryParams]="{ status: 6 }"
+          class="stat-card"
+        >
+          <span>Offerte gevraagd</span>
+          <strong>{{ summary.proposalRequestedLeads }}</strong>
+          <small>Offerte voorbereiden</small>
+        </a>
+
+        <a
+          routerLink="/leads"
+          [queryParams]="{ status: 7 }"
+          class="stat-card"
+        >
+          <span>Offerte verstuurd</span>
+          <strong>{{ summary.proposalSentLeads }}</strong>
+          <small>Opvolgen</small>
+        </a>
+
+        <a
+          routerLink="/leads"
+          [queryParams]="{ status: 8 }"
+          class="stat-card"
+        >
+          <span>Gewonnen</span>
+          <strong>{{ summary.wonLeads }}</strong>
+          <small>Nieuwe klanten</small>
+        </a>
+
+        <a
+          routerLink="/leads"
+          [queryParams]="{ status: 9 }"
+          class="stat-card"
+        >
+          <span>Verloren</span>
+          <strong>{{ summary.lostLeads }}</strong>
+          <small>Niet geconverteerd</small>
+        </a>
+      </div>
+    </section>
+
+    <section class="dashboard-section dashboard-section--split">
+      <article class="focus-panel">
+        <p class="dashboard-hero__eyebrow">Vandaag belangrijk</p>
+        <h2>Actiecentrum</h2>
+
+        <div class="action-list">
+          <a routerLink="/tasks" class="action-item">
+            <div>
+              <strong>{{ summary.openTasks }} open taken</strong>
+              <span>Bekijk wat je nog moet opvolgen.</span>
+            </div>
+            <span>→</span>
+          </a>
+
+          <a routerLink="/tasks" class="action-item">
+            <div>
+              <strong>{{ summary.dueTasks }} vervallen taken</strong>
+              <span>Taken waarvan de deadline voorbij is.</span>
+            </div>
+            <span>→</span>
+          </a>
+
+          <a routerLink="/tasks" class="action-item">
+            <div>
+              <strong>{{ summary.urgentTasks }} urgente taken</strong>
+              <span>Hoogste prioriteit eerst behandelen.</span>
+            </div>
+            <span>→</span>
+          </a>
+        </div>
+      </article>
+
+      <article class="focus-panel focus-panel--dark">
+        <p class="dashboard-hero__eyebrow">Volgende beste stap</p>
+        <h2>Werk je leads bij</h2>
+        <p>
+          Open een lead, voeg een follow-up toe en zet de status correct.
+          Zo blijft je dashboard bruikbaar.
+        </p>
+
+        <a routerLink="/leads" class="button button--light">Naar leads</a>
+      </article>
+    </section>
+  }
+</section>

@@ -1,0 +1,220 @@
+<section class="leads-page">
+  <header class="leads-page__header">
+    <div>
+      <p class="leads-page__eyebrow">CRM</p>
+      <h1>Leads</h1>
+      <p>Overzicht van potentiële klanten en hun opvolging.</p>
+    </div>
+
+    <div class="leads-page__actions">
+      <a class="leads-page__back" routerLink="/">Dashboard</a>
+
+      <button class="leads-page__primary" type="button" (click)="toggleCreateForm()">
+        @if (showCreateForm) {
+          Annuleren
+        } @else {
+          Nieuwe lead
+        }
+      </button>
+    </div>
+  </header>
+
+  @if (showCreateForm) {
+    <form class="lead-form" (ngSubmit)="createLead()">
+      <div class="lead-form__grid">
+        <label>
+          Bedrijfsnaam *
+          <input
+            type="text"
+            name="companyName"
+            [(ngModel)]="newLead.companyName"
+            placeholder="bv. Garage Stefan"
+            required
+          />
+        </label>
+
+        <label>
+          Contactpersoon
+          <input
+            type="text"
+            name="contactName"
+            [(ngModel)]="newLead.contactName"
+            placeholder="bv. Stefan"
+          />
+        </label>
+
+        <label>
+          E-mail
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="newLead.email"
+            placeholder="info@bedrijf.be"
+          />
+        </label>
+
+        <label>
+          Telefoon
+          <input
+            type="text"
+            name="phone"
+            [(ngModel)]="newLead.phone"
+            placeholder="0470 00 00 00"
+          />
+        </label>
+
+        <label>
+          Website
+          <input
+            type="text"
+            name="website"
+            [(ngModel)]="newLead.website"
+            placeholder="https://..."
+          />
+        </label>
+
+        <label>
+          Stad/gemeente
+          <input
+            type="text"
+            name="city"
+            [(ngModel)]="newLead.city"
+            placeholder="Tervuren"
+          />
+        </label>
+
+        <label>
+          Bron
+          <select name="source" [(ngModel)]="newLead.source">
+            <option value="">Kies bron</option>
+            <option value="Google Maps">Google Maps</option>
+            <option value="Instagram">Instagram</option>
+            <option value="Facebook">Facebook</option>
+            <option value="Eigen netwerk">Eigen netwerk</option>
+            <option value="Website prospectie">Website prospectie</option>
+            <option value="Mond-tot-mond">Mond-tot-mond</option>
+          </select>
+        </label>
+
+        <label>
+          Status
+          <select name="status" [(ngModel)]="newLead.status">
+            <option [ngValue]="1">Nieuw</option>
+            <option [ngValue]="2">Gebeld - niet opgenomen</option>
+            <option [ngValue]="3">Later terugbellen</option>
+            <option [ngValue]="4">Geïnteresseerd</option>
+            <option [ngValue]="5">Niet geïnteresseerd</option>
+            <option [ngValue]="6">Offerte gevraagd</option>
+            <option [ngValue]="7">Offerte verstuurd</option>
+            <option [ngValue]="8">Gewonnen</option>
+            <option [ngValue]="9">Verloren</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="lead-form__full">
+        Notities
+        <textarea
+          name="notes"
+          [(ngModel)]="newLead.notes"
+          rows="4"
+          placeholder="Korte context, afspraken of opmerkingen..."
+        ></textarea>
+      </label>
+
+      <div class="lead-form__footer">
+        <button type="submit" [disabled]="isSaving">
+          @if (isSaving) {
+            Opslaan...
+          } @else {
+            Lead opslaan
+          }
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (isLoading) {
+    <p>Leads laden...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="leads-page__error">{{ errorMessage }}</p>
+  }
+
+  @if (!isLoading && filteredLeads.length === 0) {
+    <p>Geen leads gevonden voor deze filter.</p>
+  }
+
+  <div class="lead-filter-bar">
+    <div>
+      <span>Actieve filter</span>
+      <strong>{{ getActiveFilterLabel() }}</strong>
+    </div>
+
+    @if (selectedStatusFilter) {
+      <a routerLink="/leads" class="lead-filter-bar__clear">
+        Filter wissen
+      </a>
+    }
+  </div>
+
+  @if (filteredLeads.length > 0) {
+    <div class="leads-table-wrapper">
+      <table class="leads-table">
+        <thead>
+          <tr>
+            <th>Bedrijf</th>
+            <th>Contact</th>
+            <th>Status</th>
+            <th>Bron</th>
+            <th>Stad</th>
+            <th>Laatste contact</th>
+            <th>Activiteiten</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (lead of filteredLeads; track lead.id) {
+            <tr>
+              <td>
+                <a class="lead-link" [routerLink]="['/leads', lead.id]">
+                  {{ lead.companyName }}
+                </a>
+
+                @if (lead.website) {
+                  <span>{{ lead.website }}</span>
+                }
+              </td>
+
+              <td>
+                @if (lead.contactName) {
+                  <strong>{{ lead.contactName }}</strong>
+                }
+
+                @if (lead.email) {
+                  <span>{{ lead.email }}</span>
+                }
+
+                @if (lead.phone) {
+                  <span>{{ lead.phone }}</span>
+                }
+              </td>
+
+              <td>
+                <span class="status-pill">
+                  {{ getStatusLabel(lead.status) }}
+                </span>
+              </td>
+
+              <td>{{ lead.source || '-' }}</td>
+              <td>{{ lead.city || '-' }}</td>
+              <td>{{ lead.lastContactAt || '-' }}</td>
+              <td>{{ lead.activities.length }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

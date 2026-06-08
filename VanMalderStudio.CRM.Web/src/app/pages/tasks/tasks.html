@@ -1,0 +1,153 @@
+<section class="tasks-page">
+  <header class="tasks-page__header">
+    <div>
+      <p class="tasks-page__eyebrow">CRM</p>
+      <h1>Taken</h1>
+      <p>Overzicht van openstaande taken en acties.</p>
+    </div>
+
+    <div class="tasks-page__actions">
+      <a class="tasks-page__back" routerLink="/">Dashboard</a>
+
+      <button class="tasks-page__primary" type="button" (click)="toggleCreateForm()">
+        @if (showCreateForm) {
+          Annuleren
+        } @else {
+          Nieuwe taak
+        }
+      </button>
+    </div>
+  </header>
+
+  @if (showCreateForm) {
+    <form class="task-form" (ngSubmit)="createTask()">
+      <div class="task-form__grid">
+        <label>
+          Titel *
+          <input
+            type="text"
+            name="title"
+            [(ngModel)]="newTask.title"
+            placeholder="bv. Offerte opvolgen"
+            required
+          />
+        </label>
+
+        <label>
+          Beschrijving
+          <input
+            type="text"
+            name="description"
+            [(ngModel)]="newTask.description"
+            placeholder="Optionele beschrijving"
+          />
+        </label>
+
+        <label>
+          Vervaldatum
+          <input
+            type="date"
+            name="dueDate"
+            [(ngModel)]="newTask.dueDate"
+          />
+        </label>
+
+        <label>
+          Prioriteit
+          <select name="priority" [(ngModel)]="newTask.priority">
+            <option [ngValue]="1">Low</option>
+            <option [ngValue]="2">Normal</option>
+            <option [ngValue]="3">High</option>
+            <option [ngValue]="4">Urgent</option>
+          </select>
+        </label>
+
+        <label>
+          Lead ID (optioneel)
+          <input
+            type="number"
+            name="leadId"
+            [(ngModel)]="newTask.leadId"
+            placeholder="bv. 5"
+          />
+        </label>
+      </div>
+
+      <div class="task-form__footer">
+        <button type="submit" [disabled]="isSaving">
+          @if (isSaving) {
+            Opslaan...
+          } @else {
+            Taak opslaan
+          }
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (isLoading) {
+    <p class="tasks-page__state">Taken laden...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="tasks-page__error">{{ errorMessage }}</p>
+  }
+
+  @if (!isLoading && tasks.length === 0) {
+    <p class="tasks-page__state">Geen taken gevonden.</p>
+  }
+
+  @if (tasks.length > 0) {
+    <div class="tasks-table-wrapper">
+      <table class="tasks-table">
+        <thead>
+          <tr>
+            <th>Titel</th>
+            <th>Beschrijving</th>
+            <th>Vervaldatum</th>
+            <th>Prioriteit</th>
+            <th>Status</th>
+            <th>Lead</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (task of tasks; track task.id) {
+            <tr>
+              <td>
+                <strong>{{ task.title }}</strong>
+              </td>
+
+              <td>{{ task.description || '-' }}</td>
+
+              <td>{{ formatDate(task.dueDate) }}</td>
+
+              <td>
+                <span [class]="getPriorityClass(task.priority)">
+                  {{ getPriorityLabel(task.priority) }}
+                </span>
+              </td>
+
+              <td>
+                <select
+                  [ngModel]="task.status"
+                  (ngModelChange)="updateTaskStatus(task, $event)"
+                  name="status-{{ task.id }}"
+                  class="status-select"
+                >
+                  <option [ngValue]="1">Open</option>
+                  <option [ngValue]="2">In progress</option>
+                  <option [ngValue]="3">Done</option>
+                  <option [ngValue]="4">Postponed</option>
+                  <option [ngValue]="5">Cancelled</option>
+                </select>
+              </td>
+
+              <td>{{ task.leadCompanyName || '-' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,289 @@
+<section class="lead-detail">
+  <header class="lead-detail__header">
+    <div>
+      <a class="lead-detail__back" routerLink="/leads">← Terug naar leads</a>
+
+      @if (lead) {
+        <p class="lead-detail__eyebrow">Lead detail</p>
+        <h1>{{ lead.companyName }}</h1>
+        <p>{{ lead.notes || 'Geen notities toegevoegd.' }}</p>
+      }
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p>Lead laden...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="lead-detail__error">{{ errorMessage }}</p>
+  }
+
+  @if (lead) {
+    <div class="lead-detail__grid">
+      <article class="lead-card">
+        <h2>Contactgegevens</h2>
+
+        <dl>
+          <div>
+            <dt>Contactpersoon</dt>
+            <dd>{{ lead.contactName || '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>E-mail</dt>
+            <dd>{{ lead.email || '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>Telefoon</dt>
+            <dd>{{ lead.phone || '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>Website</dt>
+            <dd>{{ lead.website || '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>Stad</dt>
+            <dd>{{ lead.city || '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>Bron</dt>
+            <dd>{{ lead.source || '-' }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="lead-card">
+        <h2>Status</h2>
+
+        <div class="status-editor">
+          <label>
+            Status
+            <select name="status" [(ngModel)]="selectedStatus">
+              <option [ngValue]="1">Nieuw</option>
+              <option [ngValue]="2">Gebeld - niet opgenomen</option>
+              <option [ngValue]="3">Later terugbellen</option>
+              <option [ngValue]="4">Geïnteresseerd</option>
+              <option [ngValue]="5">Niet geïnteresseerd</option>
+              <option [ngValue]="6">Offerte gevraagd</option>
+              <option [ngValue]="7">Offerte verstuurd</option>
+              <option [ngValue]="8">Gewonnen</option>
+              <option [ngValue]="9">Verloren</option>
+            </select>
+          </label>
+
+          <button type="button" (click)="updateStatus()" [disabled]="isSavingStatus">
+            @if (isSavingStatus) {
+              Opslaan...
+            } @else {
+              Status opslaan
+            }
+          </button>
+        </div>
+
+        <span class="status-pill">
+          Huidige status: {{ getStatusLabel(lead.status) }}
+        </span>
+
+        <dl>
+          <div>
+            <dt>Laatste contact</dt>
+            <dd>{{ lead.lastContactAt || '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>Volgende opvolging</dt>
+            <dd>{{ lead.nextFollowUpAt || '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>Aangemaakt</dt>
+            <dd>{{ lead.createdAt }}</dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+
+    <section class="activities">
+      <div class="activities__header">
+        <div>
+          <p class="lead-detail__eyebrow">Follow-up</p>
+          <h2>Activiteiten</h2>
+        </div>
+
+        <button class="activity-button" type="button" (click)="toggleActivityForm()">
+          @if (showActivityForm) {
+            Annuleren
+          } @else {
+            Follow-up toevoegen
+          }
+        </button>
+      </div>
+
+      @if (showActivityForm) {
+        <form class="activity-form" (ngSubmit)="createActivity()">
+          <label>
+            Type
+            <select name="type" [(ngModel)]="newActivity.type">
+              <option value="Call">Gebeld</option>
+              <option value="SMS">SMS gestuurd</option>
+              <option value="Email">E-mail gestuurd</option>
+              <option value="Instagram">Instagram bericht</option>
+              <option value="Meeting">Afspraak</option>
+              <option value="Proposal">Offerte</option>
+              <option value="Note">Notitie</option>
+            </select>
+          </label>
+
+          <label>
+            Beschrijving *
+            <textarea
+              name="description"
+              [(ngModel)]="newActivity.description"
+              rows="4"
+              placeholder="bv. Gebeld maar niet opgenomen. Vrijdag opnieuw proberen."
+              required
+            ></textarea>
+          </label>
+
+          <div class="activity-form__footer">
+            <button type="submit" [disabled]="isSavingActivity">
+              @if (isSavingActivity) {
+                Opslaan...
+              } @else {
+                Follow-up opslaan
+              }
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (lead.activities.length === 0) {
+        <p>Er zijn nog geen activiteiten voor deze lead.</p>
+      }
+
+      @if (lead.activities.length > 0) {
+        <div class="activity-list">
+          @for (activity of lead.activities; track activity.id) {
+            <article class="activity-item">
+              <div>
+                <strong>{{ activity.type }}</strong>
+                <p>{{ activity.description }}</p>
+              </div>
+
+              <time>{{ activity.activityDate }}</time>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="tasks">
+      <div class="tasks__header">
+        <div>
+          <p class="lead-detail__eyebrow">Taken</p>
+          <h2>Taken</h2>
+        </div>
+
+        <button class="task-button" type="button" (click)="toggleTaskForm()">
+          @if (showTaskForm) {
+            Annuleren
+          } @else {
+            Taak toevoegen
+          }
+        </button>
+      </div>
+
+      @if (showTaskForm) {
+        <form class="task-form" (ngSubmit)="createLeadTask()">
+          <label>
+            Titel *
+            <input
+              type="text"
+              name="taskTitle"
+              [(ngModel)]="newTask.title"
+              placeholder="bv. Offerte opvolgen"
+              required
+            />
+          </label>
+
+          <label>
+            Beschrijving
+            <input
+              type="text"
+              name="taskDescription"
+              [(ngModel)]="newTask.description"
+              placeholder="Optionele beschrijving"
+            />
+          </label>
+
+          <label>
+            Vervaldatum
+            <input
+              type="date"
+              name="taskDueDate"
+              [(ngModel)]="newTask.dueDate"
+            />
+          </label>
+
+          <label>
+            Prioriteit
+            <select name="taskPriority" [(ngModel)]="newTask.priority">
+              <option [ngValue]="1">Low</option>
+              <option [ngValue]="2">Normal</option>
+              <option [ngValue]="3">High</option>
+              <option [ngValue]="4">Urgent</option>
+            </select>
+          </label>
+
+          <div class="task-form__footer">
+            <button type="submit" [disabled]="isSavingTask">
+              @if (isSavingTask) {
+                Opslaan...
+              } @else {
+                Taak opslaan
+              }
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (isLoadingTasks) {
+        <p>Taken laden...</p>
+      }
+
+      @if (!isLoadingTasks && leadTasks.length === 0) {
+        <p>Er zijn nog geen taken voor deze lead.</p>
+      }
+
+      @if (leadTasks.length > 0) {
+        <div class="task-list">
+          @for (task of leadTasks; track task.id) {
+            <article class="task-item">
+              <div>
+                <strong>{{ task.title }}</strong>
+
+                @if (task.description) {
+                  <p>{{ task.description }}</p>
+                }
+
+                <div class="task-item__meta">
+                  <span [class]="getTaskPriorityClass(task.priority)">
+                    {{ getTaskPriorityLabel(task.priority) }}
+                  </span>
+                  <span class="task-item__status">{{ getTaskStatusLabel(task.status) }}</span>
+                </div>
+              </div>
+
+              <time>{{ task.dueDate || '-' }}</time>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

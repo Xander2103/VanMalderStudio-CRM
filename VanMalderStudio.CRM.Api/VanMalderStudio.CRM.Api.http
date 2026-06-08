@@ -1,0 +1,6 @@
+@VanMalderStudio.CRM.Api_HostAddress = http://localhost:5080
+
+GET {{VanMalderStudio.CRM.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
