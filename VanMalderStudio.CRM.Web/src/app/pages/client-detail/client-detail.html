@@ -12,151 +12,284 @@
     <header class="client-detail-page__header">
       <a class="client-detail-page__back" routerLink="/clients">← Terug naar klanten</a>
 
-      <div>
-        <p class="client-detail-page__eyebrow">Klant</p>
-        <h1>{{ client.companyName }}</h1>
+      <div class="client-detail-page__header-inner">
+        <div>
+          <p class="client-detail-page__eyebrow">Klant</p>
+          <h1>{{ client.companyName }}</h1>
+        </div>
+
+        <div class="client-detail-page__header-actions">
+          @if (isEditing) {
+            <button class="cd-btn cd-btn--ghost" type="button" (click)="cancelEdit()" [disabled]="isSaving">
+              Annuleren
+            </button>
+            <button class="cd-btn cd-btn--primary" type="button" (click)="saveEdit()" [disabled]="isSaving">
+              @if (isSaving) { Opslaan... } @else { Opslaan }
+            </button>
+          } @else {
+            <button class="cd-btn cd-btn--secondary" type="button" (click)="startEdit()">
+              Bewerken
+            </button>
+          }
+        </div>
       </div>
     </header>
+
+    @if (successMessage) {
+      <p class="cd-success">{{ successMessage }}</p>
+    }
 
     <div class="client-detail-grid">
 
       <!-- Contactgegevens -->
       <article class="client-card">
         <h2 class="client-card__title">Contactgegevens</h2>
-        <dl>
-          <div>
-            <dt>Contactpersoon</dt>
-            <dd>{{ client.contactName || '-' }}</dd>
+
+        @if (isEditing) {
+          <div class="cd-edit-fields">
+            <label class="cd-edit-label cd-edit-label--full">
+              Bedrijfsnaam *
+              <input type="text" name="companyName" [(ngModel)]="editForm.companyName"
+                placeholder="bv. Garage Stefan" required />
+            </label>
+            <label class="cd-edit-label">
+              Contactpersoon
+              <input type="text" name="contactName" [(ngModel)]="editForm.contactName"
+                placeholder="bv. Stefan" />
+            </label>
+            <label class="cd-edit-label">
+              E-mail
+              <input type="email" name="email" [(ngModel)]="editForm.email"
+                placeholder="info@bedrijf.be" />
+            </label>
+            <label class="cd-edit-label">
+              Telefoon
+              <input type="text" name="phone" [(ngModel)]="editForm.phone"
+                placeholder="0470 00 00 00" />
+            </label>
+            <label class="cd-edit-label">
+              Website
+              <input type="text" name="website" [(ngModel)]="editForm.website"
+                placeholder="https://..." />
+            </label>
           </div>
-          <div>
-            <dt>E-mail</dt>
-            <dd>
-              @if (client.email) {
-                <a class="client-detail-page__link" href="mailto:{{ client.email }}">{{ client.email }}</a>
-              } @else {
-                -
-              }
-            </dd>
-          </div>
-          <div>
-            <dt>Telefoon</dt>
-            <dd>{{ client.phone || '-' }}</dd>
-          </div>
-          <div>
-            <dt>Website</dt>
-            <dd>
-              @if (client.website) {
-                <a class="client-detail-page__link" [href]="client.website" target="_blank" rel="noopener">
-                  {{ client.website }} ↗
-                </a>
-              } @else {
-                -
-              }
-            </dd>
-          </div>
-          <div>
-            <dt>Klant sinds</dt>
-            <dd>{{ formatDate(client.createdAt) }}</dd>
-          </div>
-        </dl>
+        } @else {
+          <dl>
+            <div>
+              <dt>Contactpersoon</dt>
+              <dd>{{ client.contactName || '-' }}</dd>
+            </div>
+            <div>
+              <dt>E-mail</dt>
+              <dd>
+                @if (client.email) {
+                  <a class="client-detail-page__link" href="mailto:{{ client.email }}">{{ client.email }}</a>
+                } @else { - }
+              </dd>
+            </div>
+            <div>
+              <dt>Telefoon</dt>
+              <dd>{{ client.phone || '-' }}</dd>
+            </div>
+            <div>
+              <dt>Website</dt>
+              <dd>
+                @if (client.website) {
+                  <a class="client-detail-page__link" [href]="client.website" target="_blank" rel="noopener">
+                    {{ client.website }} ↗
+                  </a>
+                } @else { - }
+              </dd>
+            </div>
+            <div>
+              <dt>Klant sinds</dt>
+              <dd>{{ formatDate(client.createdAt) }}</dd>
+            </div>
+          </dl>
+        }
       </article>
 
       <!-- Zakelijk -->
       <article class="client-card">
         <h2 class="client-card__title">Zakelijk</h2>
-        <dl>
-          <div>
-            <dt>Websiteprijs</dt>
-            <dd>{{ formatEuro(client.websitePrice) }}</dd>
+
+        @if (isEditing) {
+          <div class="cd-edit-fields">
+            <label class="cd-edit-label">
+              Websiteprijs (€)
+              <input type="number" name="websitePrice" [(ngModel)]="editForm.websitePrice"
+                placeholder="bv. 1500" min="0" />
+            </label>
+            <label class="cd-edit-label">
+              Maandelijks onderhoud (€)
+              <input type="number" name="monthlyMaintenanceFee" [(ngModel)]="editForm.monthlyMaintenanceFee"
+                placeholder="bv. 50" min="0" />
+            </label>
+            <label class="cd-edit-label">
+              Betaald bedrag (€)
+              <input type="number" name="amountPaid" [(ngModel)]="editForm.amountPaid"
+                placeholder="bv. 1200" min="0" />
+            </label>
           </div>
-          <div>
-            <dt>Maandelijks onderhoud</dt>
-            <dd>{{ formatEuro(client.monthlyMaintenanceFee) }}</dd>
-          </div>
-          <div>
-            <dt>Betaald bedrag</dt>
-            <dd>{{ formatEuro(client.amountPaid) }}</dd>
-          </div>
-        </dl>
+        } @else {
+          <dl>
+            <div>
+              <dt>Websiteprijs</dt>
+              <dd>{{ formatEuro(client.websitePrice) }}</dd>
+            </div>
+            <div>
+              <dt>Maandelijks onderhoud</dt>
+              <dd>{{ formatEuro(client.monthlyMaintenanceFee) }}</dd>
+            </div>
+            <div>
+              <dt>Betaald bedrag</dt>
+              <dd>{{ formatEuro(client.amountPaid) }}</dd>
+            </div>
+          </dl>
+        }
       </article>
 
       <!-- Hosting / Server -->
       <article class="client-card">
         <h2 class="client-card__title">Hosting / Server</h2>
-        <dl>
-          <div>
-            <dt>Server IP-adres</dt>
-            <dd>{{ client.serverIpAddress || '-' }}</dd>
+
+        @if (isEditing) {
+          <div class="cd-edit-fields">
+            <label class="cd-edit-label">
+              Server IP-adres
+              <input type="text" name="serverIpAddress" [(ngModel)]="editForm.serverIpAddress"
+                placeholder="bv. 185.199.108.153" />
+            </label>
+            <label class="cd-edit-label">
+              SSH-gebruikersnaam
+              <input type="text" name="sshUsername" [(ngModel)]="editForm.sshUsername"
+                placeholder="bv. root" />
+            </label>
+            <label class="cd-edit-label">
+              Hosting provider
+              <input type="text" name="hostingProvider" [(ngModel)]="editForm.hostingProvider"
+                placeholder="bv. Combell, Cloudway" />
+            </label>
+            <label class="cd-edit-label">
+              Hosting plan
+              <input type="text" name="hostingPlan" [(ngModel)]="editForm.hostingPlan"
+                placeholder="bv. Business Pro" />
+            </label>
+            <label class="cd-edit-label">
+              Beheer URL
+              <input type="url" name="hostingManagementUrl" [(ngModel)]="editForm.hostingManagementUrl"
+                placeholder="https://..." />
+            </label>
+            <label class="cd-edit-label">
+              Verlengingsdatum
+              <input type="date" name="hostingRenewalDate" [(ngModel)]="editForm.hostingRenewalDate" />
+            </label>
           </div>
-          <div>
-            <dt>SSH-gebruikersnaam</dt>
-            <dd>{{ client.sshUsername || '-' }}</dd>
-          </div>
-          <div>
-            <dt>Hosting provider</dt>
-            <dd>{{ client.hostingProvider || '-' }}</dd>
-          </div>
-          <div>
-            <dt>Hosting plan</dt>
-            <dd>{{ client.hostingPlan || '-' }}</dd>
-          </div>
-          <div>
-            <dt>Beheer portaal</dt>
-            <dd>
-              @if (client.hostingManagementUrl) {
-                <a class="client-detail-page__link" [href]="client.hostingManagementUrl" target="_blank" rel="noopener">
-                  Portaal openen ↗
-                </a>
-              } @else {
-                -
-              }
-            </dd>
-          </div>
-          <div>
-            <dt>Hosting verlengingsdatum</dt>
-            <dd>{{ formatDate(client.hostingRenewalDate) }}</dd>
-          </div>
-        </dl>
+        } @else {
+          <dl>
+            <div>
+              <dt>Server IP-adres</dt>
+              <dd>{{ client.serverIpAddress || '-' }}</dd>
+            </div>
+            <div>
+              <dt>SSH-gebruikersnaam</dt>
+              <dd>{{ client.sshUsername || '-' }}</dd>
+            </div>
+            <div>
+              <dt>Hosting provider</dt>
+              <dd>{{ client.hostingProvider || '-' }}</dd>
+            </div>
+            <div>
+              <dt>Hosting plan</dt>
+              <dd>{{ client.hostingPlan || '-' }}</dd>
+            </div>
+            <div>
+              <dt>Beheer portaal</dt>
+              <dd>
+                @if (client.hostingManagementUrl) {
+                  <a class="client-detail-page__link" [href]="client.hostingManagementUrl" target="_blank" rel="noopener">
+                    Portaal openen ↗
+                  </a>
+                } @else { - }
+              </dd>
+            </div>
+            <div>
+              <dt>Verlengingsdatum</dt>
+              <dd>{{ formatDate(client.hostingRenewalDate) }}</dd>
+            </div>
+          </dl>
+        }
       </article>
 
       <!-- Domein -->
       <article class="client-card">
         <h2 class="client-card__title">Domein</h2>
-        <dl>
-          <div>
-            <dt>Domeinnaam</dt>
-            <dd>{{ client.domainName || '-' }}</dd>
+
+        @if (isEditing) {
+          <div class="cd-edit-fields">
+            <label class="cd-edit-label">
+              Domeinnaam
+              <input type="text" name="domainName" [(ngModel)]="editForm.domainName"
+                placeholder="bv. mijnbedrijf.be" />
+            </label>
+            <label class="cd-edit-label">
+              Registrar
+              <input type="text" name="domainRegistrar" [(ngModel)]="editForm.domainRegistrar"
+                placeholder="bv. Combell, TransIP" />
+            </label>
+            <label class="cd-edit-label">
+              Beheer URL
+              <input type="url" name="domainManagementUrl" [(ngModel)]="editForm.domainManagementUrl"
+                placeholder="https://..." />
+            </label>
+            <label class="cd-edit-label">
+              Verlengingsdatum
+              <input type="date" name="domainRenewalDate" [(ngModel)]="editForm.domainRenewalDate" />
+            </label>
           </div>
-          <div>
-            <dt>Registrar</dt>
-            <dd>{{ client.domainRegistrar || '-' }}</dd>
-          </div>
-          <div>
-            <dt>Beheer portaal</dt>
-            <dd>
-              @if (client.domainManagementUrl) {
-                <a class="client-detail-page__link" [href]="client.domainManagementUrl" target="_blank" rel="noopener">
-                  Portaal openen ↗
-                </a>
-              } @else {
-                -
-              }
-            </dd>
-          </div>
-          <div>
-            <dt>Domein verlengingsdatum</dt>
-            <dd>{{ formatDate(client.domainRenewalDate) }}</dd>
-          </div>
-        </dl>
+        } @else {
+          <dl>
+            <div>
+              <dt>Domeinnaam</dt>
+              <dd>{{ client.domainName || '-' }}</dd>
+            </div>
+            <div>
+              <dt>Registrar</dt>
+              <dd>{{ client.domainRegistrar || '-' }}</dd>
+            </div>
+            <div>
+              <dt>Beheer portaal</dt>
+              <dd>
+                @if (client.domainManagementUrl) {
+                  <a class="client-detail-page__link" [href]="client.domainManagementUrl" target="_blank" rel="noopener">
+                    Portaal openen ↗
+                  </a>
+                } @else { - }
+              </dd>
+            </div>
+            <div>
+              <dt>Verlengingsdatum</dt>
+              <dd>{{ formatDate(client.domainRenewalDate) }}</dd>
+            </div>
+          </dl>
+        }
       </article>
 
       <!-- Notities -->
-      @if (client.notes) {
-        <article class="client-card client-card--full">
-          <h2 class="client-card__title">Notities</h2>
+      <article class="client-card client-card--full" [class.client-card--hidden]="!client.notes && !isEditing">
+        <h2 class="client-card__title">Notities</h2>
+
+        @if (isEditing) {
+          <div class="cd-edit-fields">
+            <label class="cd-edit-label cd-edit-label--full">
+              <textarea name="notes" [(ngModel)]="editForm.notes" rows="4"
+                placeholder="Optionele opmerkingen..."></textarea>
+            </label>
+          </div>
+        } @else {
           <p class="client-card__notes">{{ client.notes }}</p>
-        </article>
-      }
+        }
+      </article>
 
     </div>
 
@@ -168,7 +301,6 @@
         <p class="cd-payments__error">{{ paymentsErrorMessage }}</p>
       }
 
-      <!-- Summary -->
       <div class="cd-payments-summary">
         <div class="cd-summary-card cd-summary-card--paid">
           <span>Betaald</span>
@@ -220,11 +352,7 @@
                   <td>{{ payment.notes || '-' }}</td>
                   <td>
                     @if (payment.status !== 2) {
-                      <button
-                        class="cd-payments-table__mark-paid"
-                        type="button"
-                        (click)="markPaid(payment.id)"
-                      >
+                      <button class="cd-payments-table__mark-paid" type="button" (click)="markPaid(payment.id)">
                         Markeer betaald
                       </button>
                     }

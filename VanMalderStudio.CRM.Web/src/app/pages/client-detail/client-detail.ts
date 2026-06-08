@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { catchError, of } from 'rxjs';
-import { Client, ClientService } from '../../services/client.service';
+import { FormsModule } from '@angular/forms';
+import { forkJoin, catchError, of } from 'rxjs';
+import { Client, ClientService, UpdateClient } from '../../services/client.service';
 import { ClientPayment, ClientPaymentService } from '../../services/client-payment.service';
 
 @Component({
   selector: 'app-client-detail',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './client-detail.html',
   styleUrl: './client-detail.scss'
 })
@@ -16,8 +16,13 @@ export class ClientDetail implements OnInit {
   payments: ClientPayment[] = [];
 
   isLoading = true;
+  isEditing = false;
+  isSaving = false;
   errorMessage = '';
+  successMessage = '';
   paymentsErrorMessage = '';
+
+  editForm: UpdateClient = { companyName: '' };
 
   private clientId = 0;
 
@@ -59,39 +64,92 @@ export class ClientDetail implements OnInit {
     });
   }
 
-  loadPayments(): void {
-    this.clientPaymentService.getPaymentsByClient(this.clientId).subscribe({
-      next: (data) => {
-        this.payments = data;
+  startEdit(): void {
+    if (!this.client) return;
+    this.editForm = {
+      companyName: this.client.companyName,
+      contactName: this.client.contactName,
+      email: this.client.email,
+      phone: this.client.phone,
+      website: this.client.website,
+      notes: this.client.notes,
+      websitePrice: this.client.websitePrice,
+      monthlyMaintenanceFee: this.client.monthlyMaintenanceFee,
+      amountPaid: this.client.amountPaid,
+      serverIpAddress: this.client.serverIpAddress ?? undefined,
+      sshUsername: this.client.sshUsername ?? undefined,
+      hostingProvider: this.client.hostingProvider ?? undefined,
+      hostingPlan: this.client.hostingPlan ?? undefined,
+      hostingManagementUrl: this.client.hostingManagementUrl ?? undefined,
+      hostingRenewalDate: this.toDateInputValue(this.client.hostingRenewalDate),
+      domainName: this.client.domainName ?? undefined,
+      domainRegistrar: this.client.domainRegistrar ?? undefined,
+      domainManagementUrl: this.client.domainManagementUrl ?? undefined,
+      domainRenewalDate: this.toDateInputValue(this.client.domainRenewalDate),
+    };
+    this.isEditing = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+  }
+
+  cancelEdit(): void {
+    this.isEditing = false;
+    this.errorMessage = '';
+  }
+
+  saveEdit(): void {
+    if (!this.editForm.companyName?.trim()) {
+      this.errorMessage = 'Bedrijfsnaam is verplicht.';
+      return;
+    }
+
+    this.isSaving = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const payload: UpdateClient = {
+      ...this.editForm,
+      hostingRenewalDate: this.editForm.hostingRenewalDate || null,
+      domainRenewalDate: this.editForm.domainRenewalDate || null,
+    };
+
+    this.clientService.updateClient(this.clientId, payload).subscribe({
+      next: () => {
+        if (this.client) {
+          this.client = { ...this.client, ...payload, updatedAt: new Date().toISOString() };
+        }
+        this.isEditing = false;
+        this.isSaving = false;
+        this.successMessage = 'Klantgegevens opgeslagen.';
       },
       error: () => {
-        this.paymentsErrorMessage = 'Betalingen konden niet geladen worden.';
+        this.errorMessage = 'Opslaan mislukt. Probeer opnieuw.';
+        this.isSaving = false;
       }
+    });
+  }
+
+  loadPayments(): void {
+    this.clientPaymentService.getPaymentsByClient(this.clientId).subscribe({
+      next: (data) => { this.payments = data; },
+      error: () => { this.paymentsErrorMessage = 'Betalingen konden niet geladen worden.'; }
     });
   }
 
   markPaid(id: number): void {
     this.paymentsErrorMessage = '';
     this.clientPaymentService.markPaid(id).subscribe({
-      next: () => {
-        this.loadPayments();
-      },
-      error: () => {
-        this.paymentsErrorMessage = 'Betaling kon niet gemarkeerd worden als betaald.';
-      }
+      next: () => { this.loadPayments(); },
+      error: () => { this.paymentsErrorMessage = 'Betaling kon niet gemarkeerd worden als betaald.'; }
     });
   }
 
   get totalPaid(): number {
-    return this.payments
-      .filter((p) => p.status === 2)
-      .reduce((sum, p) => sum + p.amount, 0);
+    return this.payments.filter((p) => p.status === 2).reduce((sum, p) => sum + p.amount, 0);
   }
 
   get totalOutstanding(): number {
-    return this.payments
-      .filter((p) => p.status !== 2 && p.status !== 4)
-      .reduce((sum, p) => sum + p.amount, 0);
+    return this.payments.filter((p) => p.status !== 2 && p.status !== 4).reduce((sum, p) => sum + p.amount, 0);
   }
 
   get pendingCount(): number {
@@ -118,22 +176,23 @@ export class ClientDetail implements OnInit {
     }
   }
 
+  private toDateInputValue(dateString?: string | null): string {
+    if (!dateString) return '';
+    return dateString.substring(0, 10);
+  }
+
   formatDate(dateString?: string | null): string {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('nl-BE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+      day: '2-digit', month: '2-digit', year: 'numeric'
     });
   }
 
   formatEuro(value?: number | null): string {
     if (value == null) return '-';
     return new Intl.NumberFormat('nl-BE', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
+      style: 'currency', currency: 'EUR',
+      minimumFractionDigits: 0, maximumFractionDigits: 2
     }).format(value);
   }
 }

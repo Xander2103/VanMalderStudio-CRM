@@ -24,6 +24,13 @@
   text-decoration: underline;
 }
 
+.client-detail-page__header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
 .client-detail-page__eyebrow {
   margin: 0 0 0.5rem;
   font-size: 0.85rem;
@@ -33,9 +40,16 @@
   color: #5267ff;
 }
 
-.client-detail-page__header h1 {
+.client-detail-page__header-inner h1 {
   margin: 0;
   font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.client-detail-page__header-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  align-items: center;
 }
 
 .client-detail-page__error {
@@ -62,6 +76,67 @@
   text-decoration: underline;
 }
 
+// Buttons
+.cd-btn {
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.cd-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cd-btn--primary {
+  background: #162033;
+  color: #ffffff;
+  border-color: #162033;
+}
+
+.cd-btn--primary:hover:not(:disabled) {
+  background: #5267ff;
+  border-color: #5267ff;
+}
+
+.cd-btn--ghost {
+  background: transparent;
+  color: #63708a;
+  border-color: #dde3f0;
+}
+
+.cd-btn--ghost:hover:not(:disabled) {
+  border-color: #5267ff;
+  color: #5267ff;
+}
+
+.cd-btn--secondary {
+  background: #ffffff;
+  color: #162033;
+  border-color: #dde3f0;
+  box-shadow: 0 2px 8px rgba(22, 32, 51, 0.07);
+}
+
+.cd-btn--secondary:hover:not(:disabled) {
+  border-color: #5267ff;
+  color: #5267ff;
+}
+
+// Success message
+.cd-success {
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.25rem;
+  border-radius: 0.75rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
 // Info grid
 .client-detail-grid {
   display: grid;
@@ -69,7 +144,7 @@
   gap: 1rem;
 }
 
-// Cards (shared by info and payments summary)
+// Cards
 .client-card {
   padding: 1.5rem;
   border-radius: 1.25rem;
@@ -79,6 +154,10 @@
 
 .client-card--full {
   grid-column: 1 / -1;
+}
+
+.client-card--hidden {
+  display: none;
 }
 
 .client-card__title {
@@ -117,6 +196,50 @@
   white-space: pre-wrap;
 }
 
+// Edit form fields inside cards
+.cd-edit-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.cd-edit-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #63708a;
+}
+
+.cd-edit-label--full {
+  grid-column: 1 / -1;
+}
+
+.cd-edit-label input,
+.cd-edit-label textarea {
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid #dde3f0;
+  border-radius: 0.65rem;
+  font-size: 0.92rem;
+  color: #162033;
+  background: #f9fbff;
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cd-edit-label input:focus,
+.cd-edit-label textarea:focus {
+  border-color: #5267ff;
+  outline: 2px solid rgba(82, 103, 255, 0.18);
+}
+
+.cd-edit-label textarea {
+  resize: vertical;
+}
+
 // ── Payments section ─────────────────────────────────────────────────────────
 
 .cd-payments {
@@ -142,7 +265,6 @@
   color: #63708a;
 }
 
-// Summary cards
 .cd-payments-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -206,7 +328,6 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-// Payments table
 .cd-payments-table-wrapper {
   overflow-x: auto;
   border-radius: 1.25rem;
@@ -244,7 +365,6 @@
   background: #f9fbff;
 }
 
-// Status badges
 .cd-payment-status {
   display: inline-block;
   padding: 0.25rem 0.65rem;
@@ -274,7 +394,6 @@
   color: #63708a;
 }
 
-// Mark paid button
 .cd-payments-table__mark-paid {
   padding: 0.4rem 0.85rem;
   border: 1.5px solid #5267ff;
@@ -296,6 +415,11 @@
 @media (max-width: 700px) {
   .client-detail-page {
     padding: 1rem;
+  }
+
+  .client-detail-page__header-inner {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .cd-payments-summary {
