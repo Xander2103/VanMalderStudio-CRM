@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VanMalderStudio.CRM.Api.Data;
 
@@ -11,9 +12,11 @@ using VanMalderStudio.CRM.Api.Data;
 namespace VanMalderStudio.CRM.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260608204957_AddClientBusinessHostingAndDomainFields")]
+    partial class AddClientBusinessHostingAndDomainFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,12 +79,6 @@ namespace VanMalderStudio.CRM.Api.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PaymentReminderEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PaymentReminderEnabled")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
@@ -103,54 +100,6 @@ namespace VanMalderStudio.CRM.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Clients");
-                });
-
-            modelBuilder.Entity("VanMalderStudio.CRM.Api.Models.ClientPayment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Month")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ReminderSentAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
-
-                    b.ToTable("ClientPayments");
                 });
 
             modelBuilder.Entity("VanMalderStudio.CRM.Api.Models.Lead", b =>
@@ -287,17 +236,6 @@ namespace VanMalderStudio.CRM.Api.Migrations
                     b.ToTable("TaskItems");
                 });
 
-            modelBuilder.Entity("VanMalderStudio.CRM.Api.Models.ClientPayment", b =>
-                {
-                    b.HasOne("VanMalderStudio.CRM.Api.Models.Client", "Client")
-                        .WithMany("Payments")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-                });
-
             modelBuilder.Entity("VanMalderStudio.CRM.Api.Models.LeadActivity", b =>
                 {
                     b.HasOne("VanMalderStudio.CRM.Api.Models.Lead", "Lead")
@@ -316,11 +254,6 @@ namespace VanMalderStudio.CRM.Api.Migrations
                         .HasForeignKey("LeadId");
 
                     b.Navigation("Lead");
-                });
-
-            modelBuilder.Entity("VanMalderStudio.CRM.Api.Models.Client", b =>
-                {
-                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("VanMalderStudio.CRM.Api.Models.Lead", b =>

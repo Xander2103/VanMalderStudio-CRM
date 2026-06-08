@@ -1,0 +1,303 @@
+<section class="clients-page">
+  <header class="clients-page__header">
+    <div>
+      <p class="clients-page__eyebrow">CRM</p>
+      <h1>Klanten</h1>
+      <p>Overzicht van bestaande klanten van VanMalderStudio.</p>
+    </div>
+
+    <div class="clients-page__actions">
+      <a class="clients-page__back" routerLink="/">Dashboard</a>
+
+      <button class="clients-page__primary" type="button" (click)="toggleCreateForm()">
+        @if (showCreateForm) {
+          Annuleren
+        } @else {
+          Nieuwe klant
+        }
+      </button>
+    </div>
+  </header>
+
+  @if (showCreateForm) {
+    <form class="client-form" (ngSubmit)="createClient()">
+
+      <div class="client-form__section">
+        <h3 class="client-form__section-title">Contactgegevens</h3>
+        <div class="client-form__grid">
+          <label>
+            Bedrijfsnaam *
+            <input type="text" name="companyName" [(ngModel)]="newClient.companyName"
+              placeholder="bv. Garage Stefan" required />
+          </label>
+
+          <label>
+            Contactpersoon
+            <input type="text" name="contactName" [(ngModel)]="newClient.contactName"
+              placeholder="bv. Stefan" />
+          </label>
+
+          <label>
+            E-mail
+            <input type="email" name="email" [(ngModel)]="newClient.email"
+              placeholder="info@bedrijf.be" />
+          </label>
+
+          <label>
+            Telefoon
+            <input type="text" name="phone" [(ngModel)]="newClient.phone"
+              placeholder="0470 00 00 00" />
+          </label>
+
+          <label>
+            Website
+            <input type="text" name="website" [(ngModel)]="newClient.website"
+              placeholder="https://..." />
+          </label>
+        </div>
+
+        <label class="client-form__full">
+          Notities
+          <textarea name="notes" [(ngModel)]="newClient.notes" rows="3"
+            placeholder="Optionele opmerkingen..."></textarea>
+        </label>
+      </div>
+
+      <div class="client-form__section">
+        <h3 class="client-form__section-title">Zakelijk</h3>
+        <div class="client-form__grid">
+          <label>
+            Websiteprijs (€)
+            <input type="number" name="websitePrice" [(ngModel)]="newClient.websitePrice"
+              placeholder="bv. 1500" min="0" />
+          </label>
+
+          <label>
+            Maandelijks onderhoud (€)
+            <input type="number" name="monthlyMaintenanceFee" [(ngModel)]="newClient.monthlyMaintenanceFee"
+              placeholder="bv. 50" min="0" />
+          </label>
+
+          <label>
+            Betaald bedrag (€)
+            <input type="number" name="amountPaid" [(ngModel)]="newClient.amountPaid"
+              placeholder="bv. 1200" min="0" />
+          </label>
+        </div>
+      </div>
+
+      <div class="client-form__section">
+        <h3 class="client-form__section-title">Hosting / Server</h3>
+        <div class="client-form__grid">
+          <label>
+            Server IP-adres
+            <input type="text" name="serverIpAddress" [(ngModel)]="newClient.serverIpAddress"
+              placeholder="bv. 185.199.108.153" />
+          </label>
+
+          <label>
+            SSH-gebruikersnaam
+            <input type="text" name="sshUsername" [(ngModel)]="newClient.sshUsername"
+              placeholder="bv. root" />
+          </label>
+
+          <label>
+            Hosting provider
+            <input type="text" name="hostingProvider" [(ngModel)]="newClient.hostingProvider"
+              placeholder="bv. Combell, Cloudway" />
+          </label>
+
+          <label>
+            Hosting plan
+            <input type="text" name="hostingPlan" [(ngModel)]="newClient.hostingPlan"
+              placeholder="bv. Business Pro" />
+          </label>
+
+          <label>
+            Hosting beheer URL
+            <input type="url" name="hostingManagementUrl" [(ngModel)]="newClient.hostingManagementUrl"
+              placeholder="https://..." />
+          </label>
+
+          <label>
+            Hosting verlengingsdatum
+            <input type="date" name="hostingRenewalDate" [(ngModel)]="newClient.hostingRenewalDate" />
+          </label>
+        </div>
+      </div>
+
+      <div class="client-form__section">
+        <h3 class="client-form__section-title">Domein</h3>
+        <div class="client-form__grid">
+          <label>
+            Domeinnaam
+            <input type="text" name="domainName" [(ngModel)]="newClient.domainName"
+              placeholder="bv. mijnbedrijf.be" />
+          </label>
+
+          <label>
+            Domeinregistrar
+            <input type="text" name="domainRegistrar" [(ngModel)]="newClient.domainRegistrar"
+              placeholder="bv. Combell, TransIP" />
+          </label>
+
+          <label>
+            Domein beheer URL
+            <input type="url" name="domainManagementUrl" [(ngModel)]="newClient.domainManagementUrl"
+              placeholder="https://..." />
+          </label>
+
+          <label>
+            Domein verlengingsdatum
+            <input type="date" name="domainRenewalDate" [(ngModel)]="newClient.domainRenewalDate" />
+          </label>
+        </div>
+      </div>
+
+      <div class="client-form__footer">
+        <button type="submit" [disabled]="isSaving">
+          @if (isSaving) {
+            Opslaan...
+          } @else {
+            Klant opslaan
+          }
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (errorMessage) {
+    <p class="clients-page__error">{{ errorMessage }}</p>
+  }
+
+  <div class="clients-filter-bar">
+    <input
+      class="clients-filter-bar__search"
+      type="text"
+      name="search"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="applyFilters()"
+      placeholder="Zoek op bedrijf, contact, domein, hosting..."
+    />
+
+    @if (hasActiveSearch) {
+      <button class="clients-filter-bar__clear" type="button" (click)="clearSearch()">
+        Zoekopdracht wissen
+      </button>
+    }
+
+    <span class="clients-filter-bar__count">{{ filteredClients.length }} klanten</span>
+  </div>
+
+  @if (isLoading) {
+    <p class="clients-page__state">Klanten laden...</p>
+  }
+
+  @if (!isLoading && filteredClients.length === 0) {
+    <p class="clients-page__state">Geen klanten gevonden.</p>
+  }
+
+  @if (filteredClients.length > 0) {
+    <div class="clients-table-wrapper">
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th>Bedrijf</th>
+            <th>Contact</th>
+            <th>Websiteprijs</th>
+            <th>Onderhoud/mnd</th>
+            <th>Betaald</th>
+            <th>Server IP</th>
+            <th>Hosting</th>
+            <th>Hosting portal</th>
+            <th>Domein</th>
+            <th>Registrar</th>
+            <th>Domein portal</th>
+            <th>Klant sinds</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (client of filteredClients; track client.id) {
+            <tr>
+              <td>
+                <strong>{{ client.companyName }}</strong>
+                @if (client.website) {
+                  <span>
+                    <a class="client-link" [href]="client.website" target="_blank" rel="noopener">
+                      {{ client.website }}
+                    </a>
+                  </span>
+                }
+              </td>
+
+              <td>
+                @if (client.contactName) {
+                  <strong>{{ client.contactName }}</strong>
+                }
+                @if (client.email) {
+                  <span>
+                    <a class="client-link" href="mailto:{{ client.email }}">{{ client.email }}</a>
+                  </span>
+                }
+                @if (client.phone) {
+                  <span>{{ client.phone }}</span>
+                }
+              </td>
+
+              <td>{{ formatEuro(client.websitePrice) }}</td>
+              <td>{{ formatEuro(client.monthlyMaintenanceFee) }}</td>
+              <td>{{ formatEuro(client.amountPaid) }}</td>
+              <td>{{ client.serverIpAddress || '-' }}</td>
+              <td>
+                @if (client.hostingProvider) {
+                  {{ client.hostingProvider }}
+                  @if (client.hostingPlan) {
+                    <span>{{ client.hostingPlan }}</span>
+                  }
+                } @else {
+                  -
+                }
+              </td>
+
+              <td>
+                @if (client.hostingManagementUrl) {
+                  <a class="client-link" [href]="client.hostingManagementUrl" target="_blank" rel="noopener">
+                    Beheer ↗
+                  </a>
+                } @else {
+                  -
+                }
+              </td>
+
+              <td>
+                @if (client.domainName) {
+                  {{ client.domainName }}
+                  @if (client.domainRenewalDate) {
+                    <span>Verlengt: {{ formatDate(client.domainRenewalDate) }}</span>
+                  }
+                } @else {
+                  -
+                }
+              </td>
+
+              <td>{{ client.domainRegistrar || '-' }}</td>
+
+              <td>
+                @if (client.domainManagementUrl) {
+                  <a class="client-link" [href]="client.domainManagementUrl" target="_blank" rel="noopener">
+                    Beheer ↗
+                  </a>
+                } @else {
+                  -
+                }
+              </td>
+
+              <td>{{ formatDate(client.createdAt) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

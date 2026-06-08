@@ -3,6 +3,8 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Leads } from './pages/leads/leads';
 import { LeadDetail } from './pages/lead-detail/lead-detail';
 import { Tasks } from './pages/tasks/tasks';
+import { Clients } from './pages/clients/clients';
+import { Payments } from './pages/payments/payments';
 
 export const routes: Routes = [
   {
@@ -20,5 +22,13 @@ export const routes: Routes = [
   {
     path: 'tasks',
     component: Tasks
+  },
+  {
+    path: 'clients',
+    component: Clients
+  },
+  {
+    path: 'payments',
+    component: Payments
   }
 ];

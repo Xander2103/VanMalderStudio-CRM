@@ -17,6 +17,11 @@ export class Dashboard implements OnInit {
   dueTodayTasks: TaskItem[] = [];
   warmLeads: Lead[] = [];
 
+  openPipelineValue = 0;
+  proposalSentValue = 0;
+  wonValue = 0;
+  weightedPipelineValue = 0;
+
   isLoading = true;
   errorMessage = '';
 
@@ -50,6 +55,26 @@ export class Dashboard implements OnInit {
         this.warmLeads = data.leads
           .filter((l) => l.status === 4 || l.status === 6 || l.status === 7)
           .slice(0, 5);
+
+        const activeLeads = data.leads.filter((l) => l.status !== 8 && l.status !== 9);
+
+        this.openPipelineValue = activeLeads.reduce((sum, l) => {
+          return sum + (l.proposalValue ?? l.estimatedValue ?? 0);
+        }, 0);
+
+        this.proposalSentValue = data.leads
+          .filter((l) => l.status === 7)
+          .reduce((sum, l) => sum + (l.proposalValue ?? 0), 0);
+
+        this.wonValue = data.leads
+          .filter((l) => l.status === 8)
+          .reduce((sum, l) => sum + (l.proposalValue ?? l.estimatedValue ?? 0), 0);
+
+        this.weightedPipelineValue = activeLeads.reduce((sum, l) => {
+          const value = l.proposalValue ?? l.estimatedValue ?? 0;
+          const prob = l.winProbability != null ? l.winProbability / 100 : 1;
+          return sum + value * prob;
+        }, 0);
 
         this.isLoading = false;
       },
@@ -96,5 +121,14 @@ export class Dashboard implements OnInit {
       month: '2-digit',
       year: 'numeric'
     });
+  }
+
+  formatEuro(value: number): string {
+    return new Intl.NumberFormat('nl-BE', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
   }
 }

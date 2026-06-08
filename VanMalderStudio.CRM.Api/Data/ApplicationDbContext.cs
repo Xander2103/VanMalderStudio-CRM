@@ -13,4 +13,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<Lead> Leads => Set<Lead>();
     public DbSet<LeadActivity> LeadActivities => Set<LeadActivity>();
     public DbSet<TaskItem> TaskItems => Set<TaskItem>();
+    public DbSet<Client> Clients => Set<Client>();
+    public DbSet<ClientPayment> ClientPayments => Set<ClientPayment>();
 }

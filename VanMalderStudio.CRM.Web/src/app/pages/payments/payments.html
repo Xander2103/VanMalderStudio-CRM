@@ -1,0 +1,230 @@
+<section class="payments-page">
+  <header class="payments-page__header">
+    <div>
+      <p class="payments-page__eyebrow">CRM</p>
+      <h1>Betalingen</h1>
+      <p>Overzicht van maandelijkse onderhoudsbetalingen per klant.</p>
+    </div>
+
+    <div class="payments-page__actions">
+      <a class="payments-page__back" routerLink="/">Dashboard</a>
+      <button class="payments-page__primary" type="button" (click)="toggleCreateForm()">
+        @if (showCreateForm) { Annuleren } @else { Nieuwe betaling }
+      </button>
+    </div>
+  </header>
+
+  @if (showCreateForm) {
+    <form class="payment-form" (ngSubmit)="createPayment()">
+      <h3 class="payment-form__title">Nieuwe betaling registreren</h3>
+
+      <div class="payment-form__grid">
+        <label>
+          Klant-ID *
+          <input
+            type="number"
+            name="clientId"
+            [(ngModel)]="newPayment.clientId"
+            placeholder="bv. 1"
+            min="1"
+            required
+          />
+        </label>
+
+        <label>
+          Maand
+          <select name="newMonth" [(ngModel)]="newPayment.month">
+            @for (name of monthNames; track $index) {
+              <option [ngValue]="$index + 1">{{ name }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Jaar
+          <input type="number" name="newYear" [(ngModel)]="newPayment.year" min="2020" max="2099" />
+        </label>
+
+        <label>
+          Bedrag (€) *
+          <input type="number" name="amount" [(ngModel)]="newPayment.amount" min="0" placeholder="bv. 50" required />
+        </label>
+
+        <label>
+          Vervaldatum *
+          <input type="date" name="dueDate" [(ngModel)]="newPayment.dueDate" required />
+        </label>
+      </div>
+
+      <label class="payment-form__full">
+        Notities
+        <textarea name="notes" [(ngModel)]="newPayment.notes" rows="2" placeholder="Optioneel..."></textarea>
+      </label>
+
+      <div class="payment-form__footer">
+        <button type="submit" [disabled]="isSaving">
+          @if (isSaving) { Opslaan... } @else { Betaling opslaan }
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (errorMessage) {
+    <p class="payments-page__error">{{ errorMessage }}</p>
+  }
+
+  <!-- Summary cards -->
+  <div class="payments-summary">
+    <div class="summary-card">
+      <span>Verwacht {{ monthNames[selectedMonth - 1] }}</span>
+      <strong>{{ formatEuro(totalExpected) }}</strong>
+      <small>Totaal gefactureerd</small>
+    </div>
+
+    <div class="summary-card summary-card--paid">
+      <span>Betaald</span>
+      <strong>{{ formatEuro(totalPaid) }}</strong>
+      <small>Ontvangen betalingen</small>
+    </div>
+
+    <div class="summary-card summary-card--outstanding">
+      <span>Openstaand</span>
+      <strong>{{ formatEuro(totalOutstanding) }}</strong>
+      <small>Nog te ontvangen</small>
+    </div>
+
+    <div class="summary-card summary-card--pending">
+      <span>Te betalen</span>
+      <strong>{{ pendingCount }}</strong>
+      <small>Openstaande betalingen</small>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="payments-filter-bar">
+    <label class="payments-filter-bar__label">
+      Maand
+      <select
+        name="selectedMonth"
+        [(ngModel)]="selectedMonth"
+        (ngModelChange)="onMonthYearChange()"
+      >
+        @for (name of monthNames; track $index) {
+          <option [ngValue]="$index + 1">{{ name }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="payments-filter-bar__label">
+      Jaar
+      <input
+        class="payments-filter-bar__year"
+        type="number"
+        name="selectedYear"
+        [(ngModel)]="selectedYear"
+        (ngModelChange)="onMonthYearChange()"
+        min="2020"
+        max="2099"
+      />
+    </label>
+
+    <label class="payments-filter-bar__label">
+      Status
+      <select
+        name="statusFilter"
+        [(ngModel)]="selectedStatusFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <option [ngValue]="null">Alle statussen</option>
+        <option [ngValue]="1">Openstaand</option>
+        <option [ngValue]="2">Betaald</option>
+        <option [ngValue]="3">Achterstallig</option>
+        <option [ngValue]="4">Geannuleerd</option>
+      </select>
+    </label>
+
+    @if (hasActiveFilters) {
+      <button class="payments-filter-bar__clear" type="button" (click)="clearFilters()">
+        Filter wissen
+      </button>
+    }
+
+    <button
+      class="payments-filter-bar__generate"
+      type="button"
+      (click)="generateMonth()"
+      [disabled]="isGenerating"
+    >
+      @if (isGenerating) { Genereren... } @else { Genereer maandbetalingen }
+    </button>
+
+    <span class="payments-filter-bar__count">{{ filteredPayments.length }} betalingen</span>
+  </div>
+
+  @if (generateMessage) {
+    <p class="payments-page__generate-msg">{{ generateMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="payments-page__state">Betalingen laden...</p>
+  }
+
+  @if (!isLoading && filteredPayments.length === 0) {
+    <p class="payments-page__state">Geen betalingen gevonden voor deze periode.</p>
+  }
+
+  @if (filteredPayments.length > 0) {
+    <div class="payments-table-wrapper">
+      <table class="payments-table">
+        <thead>
+          <tr>
+            <th>Klant</th>
+            <th>Periode</th>
+            <th>Bedrag</th>
+            <th>Status</th>
+            <th>Vervaldatum</th>
+            <th>Betaald op</th>
+            <th>Notities</th>
+            <th>Actie</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (payment of filteredPayments; track payment.id) {
+            <tr>
+              <td><strong>{{ payment.clientCompanyName }}</strong></td>
+
+              <td>{{ monthNames[payment.month - 1] }} {{ payment.year }}</td>
+
+              <td>{{ formatEuro(payment.amount) }}</td>
+
+              <td>
+                <span [class]="getStatusClass(payment.status)">
+                  {{ getStatusLabel(payment.status) }}
+                </span>
+              </td>
+
+              <td>{{ formatDate(payment.dueDate) }}</td>
+
+              <td>{{ formatDate(payment.paidAt) }}</td>
+
+              <td>{{ payment.notes || '-' }}</td>
+
+              <td>
+                @if (payment.status !== 2) {
+                  <button
+                    class="payments-table__mark-paid"
+                    type="button"
+                    (click)="markPaid(payment.id)"
+                  >
+                    Markeer betaald
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

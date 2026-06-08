@@ -234,6 +234,59 @@
   color: #63708a;
 }
 
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.value-card {
+  display: grid;
+  gap: 0.55rem;
+  min-height: 8.5rem;
+  padding: 1.35rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  color: #162033;
+  box-shadow: 0 18px 45px rgba(22, 32, 51, 0.08);
+}
+
+.value-card span {
+  color: #63708a;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.value-card strong {
+  font-size: 1.85rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.value-card small {
+  color: #63708a;
+}
+
+.value-card--accent {
+  background: linear-gradient(135deg, #5267ff, #7c4dff);
+  color: #ffffff;
+}
+
+.value-card--accent span,
+.value-card--accent small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.value-card--won {
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  color: #ffffff;
+}
+
+.value-card--won span,
+.value-card--won small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
 .dashboard__error,
 .state-message {
   padding: 1rem;
@@ -366,6 +419,7 @@
 
   .quick-actions,
   .stats-grid,
+  .value-grid,
   .dashboard-section--split {
     grid-template-columns: 1fr;
   }

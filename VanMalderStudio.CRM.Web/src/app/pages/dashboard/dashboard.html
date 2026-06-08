@@ -130,6 +130,41 @@
       </div>
     </section>
 
+    <section class="dashboard-section">
+      <div class="section-heading">
+        <div>
+          <p class="dashboard-hero__eyebrow">Financieel</p>
+          <h2>Omzetpotentieel</h2>
+        </div>
+      </div>
+
+      <div class="value-grid">
+        <div class="value-card">
+          <span>Open pipeline</span>
+          <strong>{{ formatEuro(openPipelineValue) }}</strong>
+          <small>Actieve leads, excl. gewonnen &amp; verloren</small>
+        </div>
+
+        <div class="value-card value-card--accent">
+          <span>Gewogen pipeline</span>
+          <strong>{{ formatEuro(weightedPipelineValue) }}</strong>
+          <small>Pipeline × kans op deal</small>
+        </div>
+
+        <div class="value-card">
+          <span>Offerte verstuurd</span>
+          <strong>{{ formatEuro(proposalSentValue) }}</strong>
+          <small>Offertewaarde in afwachting</small>
+        </div>
+
+        <div class="value-card value-card--won">
+          <span>Gewonnen</span>
+          <strong>{{ formatEuro(wonValue) }}</strong>
+          <small>Bevestigde omzet</small>
+        </div>
+      </div>
+    </section>
+
     <section class="dashboard-section dashboard-section--split">
       <article class="focus-panel">
         <p class="dashboard-hero__eyebrow">Taken</p>
