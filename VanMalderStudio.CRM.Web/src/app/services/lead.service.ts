@@ -24,6 +24,9 @@ export interface Lead {
   lastContactAt?: string;
   nextFollowUpAt?: string;
   notes?: string;
+  estimatedValue?: number | null;
+  proposalValue?: number | null;
+  winProbability?: number | null;
   createdAt: string;
   updatedAt: string;
   activities: LeadActivity[];
@@ -40,6 +43,9 @@ export interface CreateLead {
   status: number;
   nextFollowUpAt?: string | null;
   notes?: string;
+  estimatedValue?: number | null;
+  proposalValue?: number | null;
+  winProbability?: number | null;
 }
 
 export interface UpdateLead {
@@ -54,6 +60,9 @@ export interface UpdateLead {
   lastContactAt?: string | null;
   nextFollowUpAt?: string | null;
   notes?: string;
+  estimatedValue?: number | null;
+  proposalValue?: number | null;
+  winProbability?: number | null;
 }
 
 export interface CreateLeadActivity {

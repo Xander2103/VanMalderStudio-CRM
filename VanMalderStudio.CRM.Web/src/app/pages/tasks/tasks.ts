@@ -11,11 +11,16 @@ import { CreateTaskItem, TaskItem, TaskService, UpdateTaskItem } from '../../ser
 })
 export class Tasks implements OnInit {
   tasks: TaskItem[] = [];
+  filteredTasks: TaskItem[] = [];
 
   isLoading = true;
   isSaving = false;
   errorMessage = '';
   showCreateForm = false;
+
+  searchQuery = '';
+  selectedStatusFilter: number | null = null;
+  selectedPriorityFilter: number | null = null;
 
   newTask: CreateTaskItem = {
     title: '',
@@ -37,6 +42,7 @@ export class Tasks implements OnInit {
     this.taskService.getTasks().subscribe({
       next: (data) => {
         this.tasks = data;
+        this.applyFilters();
         this.isLoading = false;
       },
       error: () => {
@@ -44,6 +50,41 @@ export class Tasks implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  applyFilters(): void {
+    let result = this.tasks;
+
+    if (this.selectedStatusFilter) {
+      result = result.filter((task) => task.status === this.selectedStatusFilter);
+    }
+
+    if (this.selectedPriorityFilter) {
+      result = result.filter((task) => task.priority === this.selectedPriorityFilter);
+    }
+
+    const q = this.searchQuery.trim().toLowerCase();
+
+    if (q) {
+      result = result.filter((task) =>
+        (task.title?.toLowerCase().includes(q)) ||
+        (task.description?.toLowerCase().includes(q)) ||
+        (task.leadCompanyName?.toLowerCase().includes(q))
+      );
+    }
+
+    this.filteredTasks = result;
+  }
+
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.selectedStatusFilter = null;
+    this.selectedPriorityFilter = null;
+    this.applyFilters();
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!this.searchQuery.trim() || !!this.selectedStatusFilter || !!this.selectedPriorityFilter;
   }
 
   toggleCreateForm(): void {
@@ -62,6 +103,7 @@ export class Tasks implements OnInit {
     this.taskService.createTask(this.newTask).subscribe({
       next: (createdTask) => {
         this.tasks = [createdTask, ...this.tasks];
+        this.applyFilters();
 
         this.newTask = {
           title: '',

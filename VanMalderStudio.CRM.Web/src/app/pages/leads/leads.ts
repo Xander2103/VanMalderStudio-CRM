@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CreateLead, Lead, LeadService } from '../../services/lead.service';
 
 @Component({
@@ -18,6 +18,7 @@ export class Leads implements OnInit {
   errorMessage = '';
   showCreateForm = false;
 
+  searchQuery = '';
   selectedStatusFilter: number | null = null;
 
   newLead: CreateLead = {
@@ -30,18 +31,21 @@ export class Leads implements OnInit {
     source: '',
     status: 1,
     nextFollowUpAt: null,
-    notes: ''
+    notes: '',
+    estimatedValue: null,
+    proposalValue: null,
+    winProbability: null
   };
 
   constructor(
     private leadService: LeadService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const statusParam = params.get('status');
-
       this.selectedStatusFilter = statusParam ? Number(statusParam) : null;
       this.applyFilters();
     });
@@ -66,19 +70,36 @@ export class Leads implements OnInit {
   }
 
   applyFilters(): void {
-    if (!this.selectedStatusFilter) {
-      this.filteredLeads = this.leads;
-      return;
+    let result = this.leads;
+
+    if (this.selectedStatusFilter) {
+      result = result.filter((lead) => lead.status === this.selectedStatusFilter);
     }
 
-    this.filteredLeads = this.leads.filter(
-      (lead) => lead.status === this.selectedStatusFilter
-    );
+    const q = this.searchQuery.trim().toLowerCase();
+
+    if (q) {
+      result = result.filter((lead) =>
+        (lead.companyName?.toLowerCase().includes(q)) ||
+        (lead.contactName?.toLowerCase().includes(q)) ||
+        (lead.email?.toLowerCase().includes(q)) ||
+        (lead.phone?.toLowerCase().includes(q)) ||
+        (lead.city?.toLowerCase().includes(q)) ||
+        (lead.source?.toLowerCase().includes(q))
+      );
+    }
+
+    this.filteredLeads = result;
   }
 
-  clearFilter(): void {
+  clearFilters(): void {
+    this.searchQuery = '';
     this.selectedStatusFilter = null;
-    this.filteredLeads = this.leads;
+    this.router.navigate(['/leads']);
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!this.searchQuery.trim() || !!this.selectedStatusFilter;
   }
 
   toggleCreateForm(): void {
@@ -109,7 +130,10 @@ export class Leads implements OnInit {
           source: '',
           status: 1,
           nextFollowUpAt: null,
-          notes: ''
+          notes: '',
+          estimatedValue: null,
+          proposalValue: null,
+          winProbability: null
         };
 
         this.showCreateForm = false;
@@ -124,34 +148,16 @@ export class Leads implements OnInit {
 
   getStatusLabel(status: number): string {
     switch (status) {
-      case 1:
-        return 'Nieuw';
-      case 2:
-        return 'Gebeld - niet opgenomen';
-      case 3:
-        return 'Later terugbellen';
-      case 4:
-        return 'Geïnteresseerd';
-      case 5:
-        return 'Niet geïnteresseerd';
-      case 6:
-        return 'Offerte gevraagd';
-      case 7:
-        return 'Offerte verstuurd';
-      case 8:
-        return 'Gewonnen';
-      case 9:
-        return 'Verloren';
-      default:
-        return 'Onbekend';
+      case 1: return 'Nieuw';
+      case 2: return 'Gebeld - niet opgenomen';
+      case 3: return 'Later terugbellen';
+      case 4: return 'Geïnteresseerd';
+      case 5: return 'Niet geïnteresseerd';
+      case 6: return 'Offerte gevraagd';
+      case 7: return 'Offerte verstuurd';
+      case 8: return 'Gewonnen';
+      case 9: return 'Verloren';
+      default: return 'Onbekend';
     }
-  }
-
-  getActiveFilterLabel(): string {
-    if (!this.selectedStatusFilter) {
-      return 'Alle leads';
-    }
-
-    return this.getStatusLabel(this.selectedStatusFilter);
   }
 }

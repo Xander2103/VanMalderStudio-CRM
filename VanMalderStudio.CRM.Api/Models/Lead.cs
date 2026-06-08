@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using VanMalderStudio.CRM.Api.Enums;
 
 namespace VanMalderStudio.CRM.Api.Models;
@@ -20,6 +21,14 @@ public class Lead
     public DateTime? NextFollowUpAt { get; set; }
 
     public string? Notes { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal? EstimatedValue { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal? ProposalValue { get; set; }
+
+    public int? WinProbability { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

@@ -93,11 +93,61 @@
     <p class="tasks-page__error">{{ errorMessage }}</p>
   }
 
+  <div class="tasks-filter-bar">
+    <input
+      class="tasks-filter-bar__search"
+      type="text"
+      name="search"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="applyFilters()"
+      placeholder="Zoek op titel, beschrijving, lead..."
+    />
+
+    <select
+      class="tasks-filter-bar__select"
+      name="statusFilter"
+      [(ngModel)]="selectedStatusFilter"
+      (ngModelChange)="applyFilters()"
+    >
+      <option [ngValue]="null">Alle statussen</option>
+      <option [ngValue]="1">Open</option>
+      <option [ngValue]="2">In progress</option>
+      <option [ngValue]="3">Done</option>
+      <option [ngValue]="4">Postponed</option>
+      <option [ngValue]="5">Cancelled</option>
+    </select>
+
+    <select
+      class="tasks-filter-bar__select"
+      name="priorityFilter"
+      [(ngModel)]="selectedPriorityFilter"
+      (ngModelChange)="applyFilters()"
+    >
+      <option [ngValue]="null">Alle prioriteiten</option>
+      <option [ngValue]="1">Low</option>
+      <option [ngValue]="2">Normal</option>
+      <option [ngValue]="3">High</option>
+      <option [ngValue]="4">Urgent</option>
+    </select>
+
+    @if (hasActiveFilters) {
+      <button class="tasks-filter-bar__clear" type="button" (click)="clearFilters()">
+        Filters wissen
+      </button>
+    }
+
+    <span class="tasks-filter-bar__count">{{ filteredTasks.length }} taken</span>
+  </div>
+
   @if (!isLoading && tasks.length === 0) {
     <p class="tasks-page__state">Geen taken gevonden.</p>
   }
 
-  @if (tasks.length > 0) {
+  @if (!isLoading && tasks.length > 0 && filteredTasks.length === 0) {
+    <p class="tasks-page__state">Geen taken gevonden voor deze filters.</p>
+  }
+
+  @if (filteredTasks.length > 0) {
     <div class="tasks-table-wrapper">
       <table class="tasks-table">
         <thead>
@@ -112,7 +162,7 @@
         </thead>
 
         <tbody>
-          @for (task of tasks; track task.id) {
+          @for (task of filteredTasks; track task.id) {
             <tr>
               <td>
                 <strong>{{ task.title }}</strong>

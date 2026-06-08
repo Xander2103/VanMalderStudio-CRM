@@ -104,6 +104,21 @@
             <dt>Aangemaakt</dt>
             <dd>{{ lead.createdAt }}</dd>
           </div>
+
+          <div>
+            <dt>Geschatte waarde</dt>
+            <dd>{{ lead.estimatedValue != null ? '€' + lead.estimatedValue : '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>Offertewaarde</dt>
+            <dd>{{ lead.proposalValue != null ? '€' + lead.proposalValue : '-' }}</dd>
+          </div>
+
+          <div>
+            <dt>Kans op deal</dt>
+            <dd>{{ lead.winProbability != null ? lead.winProbability + '%' : '-' }}</dd>
+          </div>
         </dl>
       </article>
     </div>

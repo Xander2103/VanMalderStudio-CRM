@@ -37,6 +37,9 @@ public class LeadsController : ControllerBase
                 LastContactAt = lead.LastContactAt,
                 NextFollowUpAt = lead.NextFollowUpAt,
                 Notes = lead.Notes,
+                EstimatedValue = lead.EstimatedValue,
+                ProposalValue = lead.ProposalValue,
+                WinProbability = lead.WinProbability,
                 CreatedAt = lead.CreatedAt,
                 UpdatedAt = lead.UpdatedAt,
                 Activities = lead.Activities
@@ -83,6 +86,9 @@ public class LeadsController : ControllerBase
             LastContactAt = lead.LastContactAt,
             NextFollowUpAt = lead.NextFollowUpAt,
             Notes = lead.Notes,
+            EstimatedValue = lead.EstimatedValue,
+            ProposalValue = lead.ProposalValue,
+            WinProbability = lead.WinProbability,
             CreatedAt = lead.CreatedAt,
             UpdatedAt = lead.UpdatedAt,
             Activities = lead.Activities
@@ -117,6 +123,9 @@ public class LeadsController : ControllerBase
             Status = createLeadDto.Status,
             NextFollowUpAt = createLeadDto.NextFollowUpAt,
             Notes = createLeadDto.Notes,
+            EstimatedValue = createLeadDto.EstimatedValue,
+            ProposalValue = createLeadDto.ProposalValue,
+            WinProbability = createLeadDto.WinProbability,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -148,6 +157,9 @@ public class LeadsController : ControllerBase
         lead.LastContactAt = updateLeadDto.LastContactAt;
         lead.NextFollowUpAt = updateLeadDto.NextFollowUpAt;
         lead.Notes = updateLeadDto.Notes;
+        lead.EstimatedValue = updateLeadDto.EstimatedValue;
+        lead.ProposalValue = updateLeadDto.ProposalValue;
+        lead.WinProbability = updateLeadDto.WinProbability;
         lead.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();

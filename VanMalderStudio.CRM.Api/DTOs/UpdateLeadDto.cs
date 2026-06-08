@@ -15,4 +15,7 @@ public class UpdateLeadDto
     public DateTime? LastContactAt { get; set; }
     public DateTime? NextFollowUpAt { get; set; }
     public string? Notes { get; set; }
+    public decimal? EstimatedValue { get; set; }
+    public decimal? ProposalValue { get; set; }
+    public int? WinProbability { get; set; }
 }

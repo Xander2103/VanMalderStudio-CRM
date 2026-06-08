@@ -132,45 +132,66 @@
 
     <section class="dashboard-section dashboard-section--split">
       <article class="focus-panel">
-        <p class="dashboard-hero__eyebrow">Vandaag belangrijk</p>
-        <h2>Actiecentrum</h2>
+        <p class="dashboard-hero__eyebrow">Taken</p>
+        <h2>Vandaag opvolgen</h2>
 
-        <div class="action-list">
-          <a routerLink="/tasks" class="action-item">
-            <div>
-              <strong>{{ summary.openTasks }} open taken</strong>
-              <span>Bekijk wat je nog moet opvolgen.</span>
-            </div>
-            <span>→</span>
-          </a>
+        @if (dueTodayTasks.length === 0) {
+          <p class="action-empty">Geen vervallen taken voor vandaag.</p>
+        }
 
-          <a routerLink="/tasks" class="action-item">
-            <div>
-              <strong>{{ summary.dueTasks }} vervallen taken</strong>
-              <span>Taken waarvan de deadline voorbij is.</span>
-            </div>
-            <span>→</span>
-          </a>
+        @if (dueTodayTasks.length > 0) {
+          <div class="action-list">
+            @for (task of dueTodayTasks; track task.id) {
+              <a routerLink="/tasks" class="action-row">
+                <div class="action-row__body">
+                  <strong>{{ task.title }}</strong>
+                  @if (task.leadCompanyName) {
+                    <span class="action-row__sub">{{ task.leadCompanyName }}</span>
+                  }
+                </div>
+                <div class="action-row__aside">
+                  <span [class]="getTaskPriorityClass(task.priority)">
+                    {{ getTaskPriorityLabel(task.priority) }}
+                  </span>
+                  <time>{{ formatDate(task.dueDate) }}</time>
+                </div>
+              </a>
+            }
+          </div>
+        }
 
-          <a routerLink="/tasks" class="action-item">
-            <div>
-              <strong>{{ summary.urgentTasks }} urgente taken</strong>
-              <span>Hoogste prioriteit eerst behandelen.</span>
-            </div>
-            <span>→</span>
-          </a>
-        </div>
+        <a routerLink="/tasks" class="action-footer-link">Alle taken bekijken →</a>
       </article>
 
-      <article class="focus-panel focus-panel--dark">
-        <p class="dashboard-hero__eyebrow">Volgende beste stap</p>
-        <h2>Werk je leads bij</h2>
-        <p>
-          Open een lead, voeg een follow-up toe en zet de status correct.
-          Zo blijft je dashboard bruikbaar.
-        </p>
+      <article class="focus-panel">
+        <p class="dashboard-hero__eyebrow">Leads</p>
+        <h2>Warme leads</h2>
 
-        <a routerLink="/leads" class="button button--light">Naar leads</a>
+        @if (warmLeads.length === 0) {
+          <p class="action-empty">Geen warme leads op dit moment.</p>
+        }
+
+        @if (warmLeads.length > 0) {
+          <div class="action-list">
+            @for (lead of warmLeads; track lead.id) {
+              <a [routerLink]="['/leads', lead.id]" class="action-row">
+                <div class="action-row__body">
+                  <strong>{{ lead.companyName }}</strong>
+                  @if (lead.contactName) {
+                    <span class="action-row__sub">{{ lead.contactName }}</span>
+                  }
+                </div>
+                <div class="action-row__aside">
+                  <span class="action-status-pill">
+                    {{ getLeadStatusLabel(lead.status) }}
+                  </span>
+                </div>
+              </a>
+            }
+          </div>
+        }
+
+        <a routerLink="/leads" class="action-footer-link">Alle leads bekijken →</a>
       </article>
     </section>
   }

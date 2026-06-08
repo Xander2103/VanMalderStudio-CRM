@@ -110,6 +110,40 @@
             <option [ngValue]="9">Verloren</option>
           </select>
         </label>
+
+        <label>
+          Geschatte waarde (€)
+          <input
+            type="number"
+            name="estimatedValue"
+            [(ngModel)]="newLead.estimatedValue"
+            placeholder="bv. 1500"
+            min="0"
+          />
+        </label>
+
+        <label>
+          Offertewaarde (€)
+          <input
+            type="number"
+            name="proposalValue"
+            [(ngModel)]="newLead.proposalValue"
+            placeholder="bv. 1200"
+            min="0"
+          />
+        </label>
+
+        <label>
+          Kans op deal (%)
+          <input
+            type="number"
+            name="winProbability"
+            [(ngModel)]="newLead.winProbability"
+            placeholder="0 – 100"
+            min="0"
+            max="100"
+          />
+        </label>
       </div>
 
       <label class="lead-form__full">
@@ -146,17 +180,41 @@
     <p>Geen leads gevonden voor deze filter.</p>
   }
 
-  <div class="lead-filter-bar">
-    <div>
-      <span>Actieve filter</span>
-      <strong>{{ getActiveFilterLabel() }}</strong>
-    </div>
+  <div class="leads-filter-bar">
+    <input
+      class="leads-filter-bar__search"
+      type="text"
+      name="search"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="applyFilters()"
+      placeholder="Zoek op bedrijf, contact, e-mail, telefoon, stad..."
+    />
 
-    @if (selectedStatusFilter) {
-      <a routerLink="/leads" class="lead-filter-bar__clear">
-        Filter wissen
-      </a>
+    <select
+      class="leads-filter-bar__status"
+      name="statusFilter"
+      [(ngModel)]="selectedStatusFilter"
+      (ngModelChange)="applyFilters()"
+    >
+      <option [ngValue]="null">Alle statussen</option>
+      <option [ngValue]="1">Nieuw</option>
+      <option [ngValue]="2">Gebeld - niet opgenomen</option>
+      <option [ngValue]="3">Later terugbellen</option>
+      <option [ngValue]="4">Geïnteresseerd</option>
+      <option [ngValue]="5">Niet geïnteresseerd</option>
+      <option [ngValue]="6">Offerte gevraagd</option>
+      <option [ngValue]="7">Offerte verstuurd</option>
+      <option [ngValue]="8">Gewonnen</option>
+      <option [ngValue]="9">Verloren</option>
+    </select>
+
+    @if (hasActiveFilters) {
+      <button class="leads-filter-bar__clear" type="button" (click)="clearFilters()">
+        Filters wissen
+      </button>
     }
+
+    <span class="leads-filter-bar__count">{{ filteredLeads.length }} leads</span>
   </div>
 
   @if (filteredLeads.length > 0) {

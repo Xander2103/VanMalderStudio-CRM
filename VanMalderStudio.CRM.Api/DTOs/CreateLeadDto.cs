@@ -14,4 +14,7 @@ public class CreateLeadDto
     public LeadStatus Status { get; set; } = LeadStatus.New;
     public DateTime? NextFollowUpAt { get; set; }
     public string? Notes { get; set; }
+    public decimal? EstimatedValue { get; set; }
+    public decimal? ProposalValue { get; set; }
+    public int? WinProbability { get; set; }
 }

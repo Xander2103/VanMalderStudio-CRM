@@ -176,7 +176,10 @@ export class LeadDetail implements OnInit {
       status: Number(this.selectedStatus),
       lastContactAt: this.lead.lastContactAt ?? null,
       nextFollowUpAt: this.lead.nextFollowUpAt ?? null,
-      notes: this.lead.notes
+      notes: this.lead.notes,
+      estimatedValue: this.lead.estimatedValue ?? null,
+      proposalValue: this.lead.proposalValue ?? null,
+      winProbability: this.lead.winProbability ?? null
     };
 
     this.isSavingStatus = true;
