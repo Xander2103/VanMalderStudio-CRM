@@ -51,7 +51,7 @@ Requirements:
    - Monthly payment generation
    - Manual payment reminder copy action
    - Client projects with status, deadline, price and links
-5. Update the Screenshots section using:
+5. Screenshots section using:
    - docs/screenshots/login.png
    - docs/screenshots/dashboard.png
    - docs/screenshots/leads.png
