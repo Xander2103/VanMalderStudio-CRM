@@ -74,9 +74,16 @@ Requirements:
 
    Angular:
    http://localhost:4200
-7. Mention local dev login:
-   admin@vanmalderstudio.local
-   Admin123!
+
+   7. 
+The seeded login is only for a fresh local development database.
+Default seeded dev login:
+admin@vanmalderstudio.local
+Admin123!
+After first login, the admin can change the email/password from the Account page.
+Personal credentials are stored only in the local database and must never be committed.
+Do not add any real/personal credentials.
+Do not change code.
 
    But clearly say this is only a local development seeded user.
 8. Add a security note:
