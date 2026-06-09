@@ -383,3 +383,124 @@
   background: #fde8e8;
   color: #a40000;
 }
+
+.lead-detail__title-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.lead-edit__actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.lead-detail__success {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #e6f7ed;
+  color: #1a6b36;
+  margin-bottom: 1rem;
+}
+
+.lead-edit-btn {
+  padding: 0.65rem 1.25rem;
+  border: 1.5px solid #dde3f0;
+  border-radius: 999px;
+  background: transparent;
+  color: #162033;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.lead-edit-btn:hover {
+  border-color: #5267ff;
+  color: #5267ff;
+}
+
+.lead-save-btn {
+  padding: 0.7rem 1.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: #5267ff;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.lead-save-btn:hover:not(:disabled) {
+  background: #162033;
+}
+
+.lead-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lead-cancel-btn {
+  padding: 0.7rem 1.25rem;
+  border: 1.5px solid #dde3f0;
+  border-radius: 999px;
+  background: transparent;
+  color: #63708a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.lead-cancel-btn:hover:not(:disabled) {
+  border-color: #a40000;
+  color: #a40000;
+}
+
+.lead-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lead-edit-fields {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.lead-edit-fields label {
+  display: grid;
+  gap: 0.4rem;
+  color: #63708a;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.lead-edit-fields input,
+.lead-edit-fields select,
+.lead-edit-fields textarea {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #dfe5f2;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #162033;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.lead-edit-fields input:focus,
+.lead-edit-fields select:focus,
+.lead-edit-fields textarea:focus {
+  outline: 2px solid rgba(82, 103, 255, 0.25);
+  border-color: #5267ff;
+}

@@ -17,10 +17,45 @@ export class LeadDetail implements OnInit {
   isLoading = true;
   isSavingActivity = false;
   isSavingStatus = false;
+  isSavingEdit = false;
+  isEditMode = false;
 
   errorMessage = '';
+  successMessage = '';
   showActivityForm = false;
   selectedStatus = 1;
+
+  editForm: {
+    companyName: string;
+    contactName: string;
+    email: string;
+    phone: string;
+    website: string;
+    city: string;
+    source: string;
+    status: number;
+    lastContactAt: string;
+    nextFollowUpAt: string;
+    notes: string;
+    estimatedValue: number | null;
+    proposalValue: number | null;
+    winProbability: number | null;
+  } = {
+    companyName: '',
+    contactName: '',
+    email: '',
+    phone: '',
+    website: '',
+    city: '',
+    source: '',
+    status: 1,
+    lastContactAt: '',
+    nextFollowUpAt: '',
+    notes: '',
+    estimatedValue: null,
+    proposalValue: null,
+    winProbability: null,
+  };
 
   newActivity: CreateLeadActivity = {
     type: 'Call',
@@ -89,6 +124,80 @@ export class LeadDetail implements OnInit {
     });
   }
 
+  enterEditMode(): void {
+    if (!this.lead) return;
+    this.editForm = {
+      companyName: this.lead.companyName,
+      contactName: this.lead.contactName ?? '',
+      email: this.lead.email ?? '',
+      phone: this.lead.phone ?? '',
+      website: this.lead.website ?? '',
+      city: this.lead.city ?? '',
+      source: this.lead.source ?? '',
+      status: this.lead.status,
+      lastContactAt: this.toDateInput(this.lead.lastContactAt),
+      nextFollowUpAt: this.toDateInput(this.lead.nextFollowUpAt),
+      notes: this.lead.notes ?? '',
+      estimatedValue: this.lead.estimatedValue ?? null,
+      proposalValue: this.lead.proposalValue ?? null,
+      winProbability: this.lead.winProbability ?? null,
+    };
+    this.isEditMode = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+  }
+
+  cancelEdit(): void {
+    this.isEditMode = false;
+    this.errorMessage = '';
+  }
+
+  saveEdit(): void {
+    if (!this.editForm.companyName.trim()) {
+      this.errorMessage = 'Bedrijfsnaam is verplicht.';
+      return;
+    }
+
+    this.isSavingEdit = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const payload: UpdateLead = {
+      companyName: this.editForm.companyName.trim(),
+      contactName: this.editForm.contactName,
+      email: this.editForm.email,
+      phone: this.editForm.phone,
+      website: this.editForm.website,
+      city: this.editForm.city,
+      source: this.editForm.source,
+      status: this.editForm.status,
+      lastContactAt: this.editForm.lastContactAt || null,
+      nextFollowUpAt: this.editForm.nextFollowUpAt || null,
+      notes: this.editForm.notes,
+      estimatedValue: this.editForm.estimatedValue,
+      proposalValue: this.editForm.proposalValue,
+      winProbability: this.editForm.winProbability,
+    };
+
+    this.leadService.updateLead(this.leadId, payload).subscribe({
+      next: () => {
+        this.isSavingEdit = false;
+        this.isEditMode = false;
+        this.successMessage = 'Lead bijgewerkt.';
+        this.loadLead();
+      },
+      error: () => {
+        this.errorMessage = 'Lead kon niet opgeslagen worden.';
+        this.isSavingEdit = false;
+      }
+    });
+  }
+
+  private toDateInput(iso: string | undefined | null): string {
+    if (!iso) return '';
+    return iso.substring(0, 10);
+  }
+
   toggleActivityForm(): void {
     this.showActivityForm = !this.showActivityForm;
   }
@@ -113,7 +222,6 @@ export class LeadDetail implements OnInit {
           description: '',
           activityDate: null
         };
-
         this.showActivityForm = false;
         this.isSavingActivity = false;
         this.loadLead();
@@ -148,7 +256,6 @@ export class LeadDetail implements OnInit {
           priority: 2,
           leadId: null
         };
-
         this.showTaskForm = false;
         this.isSavingTask = false;
         this.loadLeadTasks();
@@ -161,9 +268,7 @@ export class LeadDetail implements OnInit {
   }
 
   updateStatus(): void {
-    if (!this.lead) {
-      return;
-    }
+    if (!this.lead) return;
 
     const updatedLead: UpdateLead = {
       companyName: this.lead.companyName,
