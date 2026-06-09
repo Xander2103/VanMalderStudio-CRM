@@ -82,6 +82,10 @@ export class LeadDetail implements OnInit {
   archiveModalReason = '';
   archiveModalError = '';
 
+  isConverting = false;
+  showConvertModal = false;
+  convertModalError = '';
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -257,6 +261,33 @@ export class LeadDetail implements OnInit {
   cancelUnarchive(): void {
     if (this.isArchiving) return;
     this.showUnarchiveModal = false;
+  }
+
+  convertLead(): void {
+    if (!this.lead) return;
+    this.convertModalError = '';
+    this.showConvertModal = true;
+  }
+
+  confirmConvert(): void {
+    this.isConverting = true;
+    this.convertModalError = '';
+
+    this.leadService.convertToClient(this.leadId).subscribe({
+      next: ({ clientId }) => {
+        this.router.navigate(['/clients', clientId]);
+      },
+      error: (err) => {
+        this.convertModalError = err?.error?.message ?? 'Omzetten mislukt. Probeer opnieuw.';
+        this.isConverting = false;
+      }
+    });
+  }
+
+  cancelConvert(): void {
+    if (this.isConverting) return;
+    this.showConvertModal = false;
+    this.convertModalError = '';
   }
 
   private toDateInput(iso: string | undefined | null): string {

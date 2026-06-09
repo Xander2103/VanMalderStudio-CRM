@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using VanMalderStudio.CRM.Api.Data;
 using VanMalderStudio.CRM.Api.Models;
 using VanMalderStudio.CRM.Api.DTOs;
+using VanMalderStudio.CRM.Api.Enums;
 
 namespace VanMalderStudio.CRM.Api.Controllers;
 
@@ -26,9 +27,10 @@ public class LeadsController : ControllerBase
 
         query = archiveFilter switch
         {
+            "won"      => query.Where(l => !l.IsArchived && l.Status == LeadStatus.Won),
             "archived" => query.Where(l => l.IsArchived),
             "all"      => query,
-            _          => query.Where(l => !l.IsArchived)
+            _          => query.Where(l => !l.IsArchived && l.Status != LeadStatus.Won && l.Status != LeadStatus.Lost)
         };
 
         var leads = await query
@@ -221,6 +223,53 @@ public class LeadsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    [HttpPost("{id:int}/convert-to-client")]
+    public async Task<IActionResult> ConvertToClient(int id)
+    {
+        var lead = await _context.Leads.FindAsync(id);
+
+        if (lead is null)
+            return NotFound();
+
+        if (lead.IsArchived)
+            return BadRequest(new { message = "Een gearchiveerde lead kan niet worden omgezet naar klant." });
+
+        var companyName = lead.CompanyName.Trim();
+        var email = lead.Email?.Trim();
+
+        if (!string.IsNullOrEmpty(email) &&
+            await _context.Clients.AnyAsync(c => !c.IsArchived && c.Email != null && c.Email == email))
+            return BadRequest(new { message = $"Er bestaat al een actieve klant met e-mailadres '{email}'." });
+
+        if (await _context.Clients.AnyAsync(c => !c.IsArchived && c.CompanyName == companyName))
+            return BadRequest(new { message = $"Er bestaat al een actieve klant met bedrijfsnaam '{companyName}'." });
+
+        var notes = string.IsNullOrWhiteSpace(lead.Notes)
+            ? $"Aangemaakt vanuit lead #{lead.Id}"
+            : $"Aangemaakt vanuit lead #{lead.Id}\n\n{lead.Notes}";
+
+        var client = new Client
+        {
+            CompanyName = companyName,
+            ContactName = lead.ContactName,
+            Email = email,
+            Phone = lead.Phone,
+            Website = lead.Website,
+            Notes = notes,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _context.Clients.Add(client);
+
+        lead.Status = LeadStatus.Won;
+        lead.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { clientId = client.Id });
     }
 
     [HttpDelete("{id:int}")]

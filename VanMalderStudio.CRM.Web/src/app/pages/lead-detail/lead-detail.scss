@@ -481,6 +481,51 @@
   font-weight: 700;
 }
 
+.lead-convert-btn {
+  padding: 0.65rem 1.25rem;
+  border: 1.5px solid #a5b4fc;
+  border-radius: 999px;
+  background: transparent;
+  color: #5267ff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.lead-convert-btn:hover:not(:disabled) {
+  background: #eef0ff;
+  border-color: #5267ff;
+}
+
+.lead-convert-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lead-convert-modal-btn {
+  padding: 0.7rem 1.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: #5267ff;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lead-convert-modal-btn:hover:not(:disabled) {
+  background: #162033;
+}
+
+.lead-convert-modal-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .lead-archive-btn {
   padding: 0.65rem 1.25rem;
   border: 1.5px solid #ffc9a0;

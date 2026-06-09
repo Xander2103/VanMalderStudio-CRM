@@ -82,7 +82,7 @@ export class LeadService {
 
   constructor(private http: HttpClient) {}
 
-  getLeads(archiveFilter: 'active' | 'archived' | 'all' = 'active'): Observable<Lead[]> {
+  getLeads(archiveFilter: 'active' | 'won' | 'archived' | 'all' = 'active'): Observable<Lead[]> {
     return this.http.get<Lead[]>(`${this.apiUrl}?archiveFilter=${archiveFilter}`);
   }
 
@@ -108,5 +108,9 @@ export class LeadService {
 
   createActivity(leadId: number, activity: CreateLeadActivity): Observable<LeadActivity> {
     return this.http.post<LeadActivity>(`${this.apiUrl}/${leadId}/activities`, activity);
+  }
+
+  convertToClient(id: number): Observable<{ clientId: number }> {
+    return this.http.post<{ clientId: number }>(`${this.apiUrl}/${id}/convert-to-client`, {});
   }
 }

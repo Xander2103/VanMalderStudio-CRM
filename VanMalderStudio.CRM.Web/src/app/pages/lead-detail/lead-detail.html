@@ -14,6 +14,7 @@
             <div class="lead-edit__actions">
               @if (!lead.isArchived) {
                 <button class="lead-edit-btn" type="button" (click)="enterEditMode()">Bewerken</button>
+                <button class="lead-convert-btn" type="button" (click)="convertLead()" [disabled]="isConverting">Omzetten naar klant</button>
                 <button class="lead-archive-btn" type="button" (click)="archiveLead()" [disabled]="isArchiving">Archiveren</button>
               } @else {
                 <button class="lead-unarchive-btn" type="button" (click)="unarchiveLead()" [disabled]="isArchiving">
@@ -547,6 +548,28 @@
         </button>
         <button class="archive-modal__unarchive" type="button" (click)="confirmUnarchive()" [disabled]="isArchiving">
           {{ isArchiving ? 'Bezig...' : 'Herstellen' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showConvertModal) {
+  <div class="archive-modal-overlay" (click)="cancelConvert()">
+    <div class="archive-modal" (click)="$event.stopPropagation()">
+      <h3 class="archive-modal__title">Lead omzetten naar klant</h3>
+      <p class="archive-modal__text">Deze lead wordt als klant aangemaakt en de leadstatus wordt op Gewonnen gezet.</p>
+
+      @if (convertModalError) {
+        <p class="archive-modal__error">{{ convertModalError }}</p>
+      }
+
+      <div class="archive-modal__actions">
+        <button class="archive-modal__cancel" type="button" (click)="cancelConvert()" [disabled]="isConverting">
+          Annuleren
+        </button>
+        <button class="lead-convert-modal-btn" type="button" (click)="confirmConvert()" [disabled]="isConverting">
+          {{ isConverting ? 'Bezig...' : 'Omzetten' }}
         </button>
       </div>
     </div>

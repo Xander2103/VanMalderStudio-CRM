@@ -20,7 +20,7 @@ export class Leads implements OnInit {
 
   searchQuery = '';
   selectedStatusFilter: number | null = null;
-  archiveFilter: 'active' | 'archived' | 'all' = 'active';
+  archiveFilter: 'active' | 'won' | 'archived' | 'all' = 'active';
 
   newLead: CreateLead = {
     companyName: '',
@@ -70,7 +70,7 @@ export class Leads implements OnInit {
     });
   }
 
-  setArchiveFilter(filter: 'active' | 'archived' | 'all'): void {
+  setArchiveFilter(filter: 'active' | 'won' | 'archived' | 'all'): void {
     this.archiveFilter = filter;
     this.loadLeads();
   }

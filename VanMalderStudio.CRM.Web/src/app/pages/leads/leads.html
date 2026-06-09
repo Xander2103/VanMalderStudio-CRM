@@ -185,6 +185,12 @@
     >Actief</button>
     <button
       class="leads-archive-filter__btn"
+      [class.leads-archive-filter__btn--active]="archiveFilter === 'won'"
+      type="button"
+      (click)="setArchiveFilter('won')"
+    >Gewonnen</button>
+    <button
+      class="leads-archive-filter__btn"
       [class.leads-archive-filter__btn--active]="archiveFilter === 'archived'"
       type="button"
       (click)="setArchiveFilter('archived')"
