@@ -93,4 +93,18 @@ Do not change code.
 9. Do not change code.
 10. Only update README.md.
 
+Add the latest CRM workflow features to the Features section:
+- Duplicate prevention for active leads and clients
+- Archive/unarchive workflow for leads and clients
+- Custom archive modal with optional reason
+- Convert Lead to Client workflow
+- Separate Leads tabs for Active, Won, Archived and All
+
+Also update the project description slightly to explain the full CRM flow:
+Lead follow-up → won lead → convert to client → manage projects/payments.
+
+Do not add personal credentials.
+Do not change code.
+Keep README professional and not too long.
+
 After implementation, summarize what changed.
