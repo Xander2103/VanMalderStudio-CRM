@@ -51,7 +51,7 @@ export interface UpdateClientProject {
   providedIn: 'root'
 })
 export class ClientProjectService {
-  private readonly apiUrl = 'http://localhost:5080/api/ClientProjects';
+  private readonly apiUrl = 'https://localhost:7242/api/ClientProjects';
 
   constructor(private http: HttpClient) {}
 

@@ -6,34 +6,18 @@ import { Tasks } from './pages/tasks/tasks';
 import { Clients } from './pages/clients/clients';
 import { Payments } from './pages/payments/payments';
 import { ClientDetail } from './pages/client-detail/client-detail';
+import { Login } from './pages/login/login';
+import { Account } from './pages/account/account';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  {
-    path: '',
-    component: Dashboard
-  },
-  {
-    path: 'leads',
-    component: Leads
-  },
-  {
-    path: 'leads/:id',
-    component: LeadDetail
-  },
-  {
-    path: 'tasks',
-    component: Tasks
-  },
-  {
-    path: 'clients',
-    component: Clients
-  },
-  {
-    path: 'clients/:id',
-    component: ClientDetail
-  },
-  {
-    path: 'payments',
-    component: Payments
-  }
+  { path: 'login', component: Login },
+  { path: '', component: Dashboard, canActivate: [authGuard] },
+  { path: 'leads', component: Leads, canActivate: [authGuard] },
+  { path: 'leads/:id', component: LeadDetail, canActivate: [authGuard] },
+  { path: 'tasks', component: Tasks, canActivate: [authGuard] },
+  { path: 'clients', component: Clients, canActivate: [authGuard] },
+  { path: 'clients/:id', component: ClientDetail, canActivate: [authGuard] },
+  { path: 'payments', component: Payments, canActivate: [authGuard] },
+  { path: 'account', component: Account, canActivate: [authGuard] }
 ];

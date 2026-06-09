@@ -84,7 +84,7 @@ export interface UpdateClient {
   providedIn: 'root'
 })
 export class ClientService {
-  private readonly apiUrl = 'http://localhost:5080/api/Clients';
+  private readonly apiUrl = 'https://localhost:7242/api/Clients';
 
   constructor(private http: HttpClient) {}
 

@@ -22,7 +22,7 @@ export interface DashboardSummary {
   providedIn: 'root'
 })
 export class DashboardService {
-  private readonly apiUrl = 'http://localhost:5080/api/Dashboard/summary';
+  private readonly apiUrl = 'https://localhost:7242/api/Dashboard/summary';
 
   constructor(private http: HttpClient) {}
 

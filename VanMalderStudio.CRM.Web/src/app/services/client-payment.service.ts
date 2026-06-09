@@ -47,7 +47,7 @@ export interface UpdateClientPayment {
   providedIn: 'root'
 })
 export class ClientPaymentService {
-  private readonly apiUrl = 'http://localhost:5080/api/ClientPayments';
+  private readonly apiUrl = 'https://localhost:7242/api/ClientPayments';
 
   constructor(private http: HttpClient) {}
 

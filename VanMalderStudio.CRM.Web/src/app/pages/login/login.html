@@ -1,0 +1,42 @@
+<div class="login-page">
+  <div class="login-card">
+    <p class="login-eyebrow">Van Malder Studio</p>
+    <h1 class="login-title">Inloggen</h1>
+
+    @if (errorMessage) {
+      <p class="login-error">{{ errorMessage }}</p>
+    }
+
+    <form class="login-form" (ngSubmit)="submit()">
+      <label class="login-label">
+        E-mailadres
+        <input
+          type="email"
+          class="login-input"
+          [(ngModel)]="email"
+          name="email"
+          autocomplete="email"
+          placeholder="admin@vanmalderstudio.local"
+          [disabled]="isLoading"
+        />
+      </label>
+
+      <label class="login-label">
+        Wachtwoord
+        <input
+          type="password"
+          class="login-input"
+          [(ngModel)]="password"
+          name="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          [disabled]="isLoading"
+        />
+      </label>
+
+      <button type="submit" class="login-btn" [disabled]="isLoading">
+        {{ isLoading ? 'Bezig...' : 'Inloggen' }}
+      </button>
+    </form>
+  </div>
+</div>

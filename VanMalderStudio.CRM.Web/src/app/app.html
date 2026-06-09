@@ -1,45 +1,54 @@
-<nav class="app-nav">
-  <a class="app-nav__brand" routerLink="/">VanMalderStudio CRM</a>
+@if (authService.isLoggedIn()) {
+  <nav class="app-nav">
+    <a class="app-nav__brand" routerLink="/">VanMalderStudio CRM</a>
 
-  <ul class="app-nav__links">
-    <li>
-      <a
-        class="app-nav__link"
-        routerLink="/"
-        routerLinkActive="app-nav__link--active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >Dashboard</a>
-    </li>
-    <li>
-      <a
-        class="app-nav__link"
-        routerLink="/leads"
-        routerLinkActive="app-nav__link--active"
-      >Leads</a>
-    </li>
-    <li>
-      <a
-        class="app-nav__link"
-        routerLink="/tasks"
-        routerLinkActive="app-nav__link--active"
-      >Taken</a>
-    </li>
-    <li>
-      <a
-        class="app-nav__link"
-        routerLink="/clients"
-        routerLinkActive="app-nav__link--active"
-      >Klanten</a>
-    </li>
-    <li>
-      <a
-        class="app-nav__link"
-        routerLink="/payments"
-        routerLinkActive="app-nav__link--active"
-      >Betalingen</a>
-    </li>
-  </ul>
-</nav>
+    <ul class="app-nav__links">
+      <li>
+        <a
+          class="app-nav__link"
+          routerLink="/"
+          routerLinkActive="app-nav__link--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >Dashboard</a>
+      </li>
+      <li>
+        <a
+          class="app-nav__link"
+          routerLink="/leads"
+          routerLinkActive="app-nav__link--active"
+        >Leads</a>
+      </li>
+      <li>
+        <a
+          class="app-nav__link"
+          routerLink="/tasks"
+          routerLinkActive="app-nav__link--active"
+        >Taken</a>
+      </li>
+      <li>
+        <a
+          class="app-nav__link"
+          routerLink="/clients"
+          routerLinkActive="app-nav__link--active"
+        >Klanten</a>
+      </li>
+      <li>
+        <a
+          class="app-nav__link"
+          routerLink="/payments"
+          routerLinkActive="app-nav__link--active"
+        >Betalingen</a>
+      </li>
+    </ul>
+
+    <a
+      class="app-nav__link app-nav__account"
+      routerLink="/account"
+      routerLinkActive="app-nav__link--active"
+    >Account</a>
+    <button class="app-nav__logout" (click)="logout()">Uitloggen</button>
+  </nav>
+}
 
 <main class="app-main">
   <router-outlet></router-outlet>

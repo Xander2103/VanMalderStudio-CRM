@@ -75,7 +75,7 @@ export interface CreateLeadActivity {
   providedIn: 'root'
 })
 export class LeadService {
-  private readonly apiUrl = 'http://localhost:5080/api/Leads';
+  private readonly apiUrl = 'https://localhost:7242/api/Leads';
 
   constructor(private http: HttpClient) {}
 

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VanMalderStudio.CRM.Api.Data;
@@ -6,6 +7,7 @@ using VanMalderStudio.CRM.Api.Models;
 
 namespace VanMalderStudio.CRM.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class TasksController : ControllerBase

@@ -1,0 +1,81 @@
+<div class="account-page">
+  <div class="account-header">
+    <h1 class="account-title">Account</h1>
+    <p class="account-subtitle">Wijzig je inloggegevens</p>
+  </div>
+
+  <div class="account-card">
+    <div class="account-current">
+      <span class="account-meta-label">Huidig e-mailadres</span>
+      <span class="account-meta-value">{{ currentEmail || '…' }}</span>
+    </div>
+
+    @if (successMessage) {
+      <p class="account-success">{{ successMessage }}</p>
+    }
+
+    @if (errorMessage) {
+      <p class="account-error">{{ errorMessage }}</p>
+    }
+
+    <form class="account-form" (ngSubmit)="save()">
+      <label class="account-field">
+        Huidig wachtwoord
+        <input
+          type="password"
+          class="account-input"
+          [(ngModel)]="currentPassword"
+          name="currentPassword"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          [disabled]="isLoading"
+        />
+      </label>
+
+      <div class="account-divider"></div>
+
+      <label class="account-field">
+        Nieuw e-mailadres
+        <input
+          type="email"
+          class="account-input"
+          [(ngModel)]="newEmail"
+          name="newEmail"
+          autocomplete="email"
+          placeholder="Laat leeg om niet te wijzigen"
+          [disabled]="isLoading"
+        />
+      </label>
+
+      <label class="account-field">
+        Nieuw wachtwoord
+        <input
+          type="password"
+          class="account-input"
+          [(ngModel)]="newPassword"
+          name="newPassword"
+          autocomplete="new-password"
+          placeholder="Laat leeg om niet te wijzigen"
+          [disabled]="isLoading"
+        />
+      </label>
+
+      <label class="account-field">
+        Bevestig nieuw wachtwoord
+        <input
+          type="password"
+          class="account-input"
+          [(ngModel)]="confirmNewPassword"
+          name="confirmNewPassword"
+          autocomplete="new-password"
+          placeholder="Herhaal nieuw wachtwoord"
+          [disabled]="isLoading"
+        />
+      </label>
+
+      <button type="submit" class="account-btn" [disabled]="isLoading">
+        {{ isLoading ? 'Opslaan...' : 'Opslaan' }}
+      </button>
+    </form>
+  </div>
+</div>

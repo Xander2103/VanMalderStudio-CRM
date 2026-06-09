@@ -16,4 +16,5 @@ public class ApplicationDbContext : DbContext
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<ClientPayment> ClientPayments => Set<ClientPayment>();
     public DbSet<ClientProject> ClientProjects => Set<ClientProject>();
+    public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
 }

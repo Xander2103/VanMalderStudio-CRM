@@ -36,7 +36,7 @@ export interface UpdateTaskItem {
   providedIn: 'root'
 })
 export class TaskService {
-  private readonly apiUrl = 'http://localhost:5080/api/Tasks';
+  private readonly apiUrl = 'https://localhost:7242/api/Tasks';
 
   constructor(private http: HttpClient) {}
 
