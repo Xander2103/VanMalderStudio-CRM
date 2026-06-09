@@ -280,6 +280,48 @@
   color: #5267ff;
 }
 
+.clients-archive-filter {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.clients-archive-filter__btn {
+  padding: 0.45rem 1rem;
+  border: 1.5px solid #dde3f0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #63708a;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.clients-archive-filter__btn:hover {
+  border-color: #5267ff;
+  color: #5267ff;
+}
+
+.clients-archive-filter__btn--active {
+  border-color: #5267ff;
+  background: #eef1ff;
+  color: #5267ff;
+  font-weight: 700;
+}
+
+.archived-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
 @media (max-width: 640px) {
   .clients-page {
     padding: 1rem;

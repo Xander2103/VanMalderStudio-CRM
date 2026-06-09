@@ -19,6 +19,7 @@ export class Clients implements OnInit {
   showCreateForm = false;
 
   searchQuery = '';
+  archiveFilter: 'active' | 'archived' | 'all' = 'active';
 
   newClient: CreateClient = {
     companyName: '',
@@ -51,7 +52,7 @@ export class Clients implements OnInit {
   loadClients(): void {
     this.isLoading = true;
 
-    this.clientService.getClients().subscribe({
+    this.clientService.getClients(this.archiveFilter).subscribe({
       next: (data) => {
         this.clients = data;
         this.applyFilters();
@@ -62,6 +63,11 @@ export class Clients implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  setArchiveFilter(filter: 'active' | 'archived' | 'all'): void {
+    this.archiveFilter = filter;
+    this.loadClients();
   }
 
   applyFilters(): void {
@@ -134,8 +140,8 @@ export class Clients implements OnInit {
         this.showCreateForm = false;
         this.isSaving = false;
       },
-      error: () => {
-        this.errorMessage = 'Klant kon niet aangemaakt worden.';
+      error: (err: { error?: { message?: string } }) => {
+        this.errorMessage = err.error?.message ?? 'Klant kon niet aangemaakt worden.';
         this.isSaving = false;
       }
     });

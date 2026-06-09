@@ -41,14 +41,26 @@ public class ClientsController : ControllerBase
         DomainRegistrar = c.DomainRegistrar,
         DomainManagementUrl = c.DomainManagementUrl,
         DomainRenewalDate = c.DomainRenewalDate,
+        IsArchived = c.IsArchived,
+        ArchivedAt = c.ArchivedAt,
+        ArchiveReason = c.ArchiveReason,
         CreatedAt = c.CreatedAt,
         UpdatedAt = c.UpdatedAt
     };
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ClientResponseDto>>> GetClients()
+    public async Task<ActionResult<IEnumerable<ClientResponseDto>>> GetClients([FromQuery] string? archiveFilter = "active")
     {
-        var clients = await _context.Clients
+        IQueryable<Client> query = _context.Clients;
+
+        query = archiveFilter switch
+        {
+            "archived" => query.Where(c => c.IsArchived),
+            "all"      => query,
+            _          => query.Where(c => !c.IsArchived)
+        };
+
+        var clients = await query
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
 
@@ -61,9 +73,7 @@ public class ClientsController : ControllerBase
         var client = await _context.Clients.FindAsync(id);
 
         if (client is null)
-        {
             return NotFound();
-        }
 
         return Ok(MapToDto(client));
     }
@@ -71,11 +81,21 @@ public class ClientsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ClientResponseDto>> CreateClient(CreateClientDto dto)
     {
+        var companyName = dto.CompanyName.Trim();
+        var email = dto.Email?.Trim();
+
+        if (!string.IsNullOrEmpty(email) &&
+            await _context.Clients.AnyAsync(c => !c.IsArchived && c.Email != null && c.Email.ToLower() == email.ToLower()))
+            return BadRequest(new { message = $"Er bestaat al een klant met e-mailadres '{email}'." });
+
+        if (await _context.Clients.AnyAsync(c => !c.IsArchived && c.CompanyName.ToLower() == companyName.ToLower()))
+            return BadRequest(new { message = $"Er bestaat al een klant met bedrijfsnaam '{companyName}'." });
+
         var client = new Client
         {
-            CompanyName = dto.CompanyName,
+            CompanyName = companyName,
             ContactName = dto.ContactName,
-            Email = dto.Email,
+            Email = email,
             Phone = dto.Phone,
             Website = dto.Website,
             Notes = dto.Notes,
@@ -108,9 +128,7 @@ public class ClientsController : ControllerBase
         var client = await _context.Clients.FindAsync(id);
 
         if (client is null)
-        {
             return NotFound();
-        }
 
         client.CompanyName = dto.CompanyName;
         client.ContactName = dto.ContactName;
@@ -138,15 +156,49 @@ public class ClientsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPut("{id:int}/archive")]
+    public async Task<IActionResult> ArchiveClient(int id, [FromBody] ArchiveDto dto)
+    {
+        var client = await _context.Clients.FindAsync(id);
+
+        if (client is null)
+            return NotFound();
+
+        client.IsArchived = true;
+        client.ArchivedAt = DateTime.UtcNow;
+        client.ArchiveReason = dto.Reason;
+        client.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:int}/unarchive")]
+    public async Task<IActionResult> UnarchiveClient(int id)
+    {
+        var client = await _context.Clients.FindAsync(id);
+
+        if (client is null)
+            return NotFound();
+
+        client.IsArchived = false;
+        client.ArchivedAt = null;
+        client.ArchiveReason = null;
+        client.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteClient(int id)
     {
         var client = await _context.Clients.FindAsync(id);
 
         if (client is null)
-        {
             return NotFound();
-        }
 
         _context.Clients.Remove(client);
         await _context.SaveChangesAsync();

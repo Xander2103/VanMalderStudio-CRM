@@ -27,6 +27,9 @@ export interface Lead {
   estimatedValue?: number | null;
   proposalValue?: number | null;
   winProbability?: number | null;
+  isArchived: boolean;
+  archivedAt?: string | null;
+  archiveReason?: string | null;
   createdAt: string;
   updatedAt: string;
   activities: LeadActivity[];
@@ -79,8 +82,8 @@ export class LeadService {
 
   constructor(private http: HttpClient) {}
 
-  getLeads(): Observable<Lead[]> {
-    return this.http.get<Lead[]>(this.apiUrl);
+  getLeads(archiveFilter: 'active' | 'archived' | 'all' = 'active'): Observable<Lead[]> {
+    return this.http.get<Lead[]>(`${this.apiUrl}?archiveFilter=${archiveFilter}`);
   }
 
   getLead(id: number): Observable<Lead> {
@@ -93,6 +96,14 @@ export class LeadService {
 
   updateLead(id: number, lead: UpdateLead): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}`, lead);
+  }
+
+  archiveLead(id: number, reason: string | null): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/archive`, { reason });
+  }
+
+  unarchiveLead(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/unarchive`, {});
   }
 
   createActivity(leadId: number, activity: CreateLeadActivity): Observable<LeadActivity> {

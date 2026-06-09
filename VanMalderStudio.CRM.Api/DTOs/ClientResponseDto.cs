@@ -31,6 +31,10 @@ public class ClientResponseDto
     public string? DomainManagementUrl { get; set; }
     public DateTime? DomainRenewalDate { get; set; }
 
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+    public string? ArchiveReason { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

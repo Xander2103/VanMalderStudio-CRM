@@ -20,6 +20,7 @@ export class Leads implements OnInit {
 
   searchQuery = '';
   selectedStatusFilter: number | null = null;
+  archiveFilter: 'active' | 'archived' | 'all' = 'active';
 
   newLead: CreateLead = {
     companyName: '',
@@ -56,7 +57,7 @@ export class Leads implements OnInit {
   loadLeads(): void {
     this.isLoading = true;
 
-    this.leadService.getLeads().subscribe({
+    this.leadService.getLeads(this.archiveFilter).subscribe({
       next: (data) => {
         this.leads = data;
         this.applyFilters();
@@ -67,6 +68,11 @@ export class Leads implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  setArchiveFilter(filter: 'active' | 'archived' | 'all'): void {
+    this.archiveFilter = filter;
+    this.loadLeads();
   }
 
   applyFilters(): void {
@@ -139,8 +145,8 @@ export class Leads implements OnInit {
         this.showCreateForm = false;
         this.isSaving = false;
       },
-      error: () => {
-        this.errorMessage = 'Lead kon niet aangemaakt worden.';
+      error: (err: { error?: { message?: string } }) => {
+        this.errorMessage = err.error?.message ?? 'Lead kon niet aangemaakt worden.';
         this.isSaving = false;
       }
     });

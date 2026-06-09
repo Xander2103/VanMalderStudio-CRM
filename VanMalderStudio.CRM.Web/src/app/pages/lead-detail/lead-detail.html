@@ -8,7 +8,19 @@
           <p class="lead-detail__eyebrow">Lead detail</p>
           <div class="lead-detail__title-row">
             <h1>{{ lead.companyName }}</h1>
-            <button class="lead-edit-btn" type="button" (click)="enterEditMode()">Bewerken</button>
+            @if (lead.isArchived) {
+              <span class="lead-archived-badge">Gearchiveerd</span>
+            }
+            <div class="lead-edit__actions">
+              @if (!lead.isArchived) {
+                <button class="lead-edit-btn" type="button" (click)="enterEditMode()">Bewerken</button>
+                <button class="lead-archive-btn" type="button" (click)="archiveLead()" [disabled]="isArchiving">Archiveren</button>
+              } @else {
+                <button class="lead-unarchive-btn" type="button" (click)="unarchiveLead()" [disabled]="isArchiving">
+                  {{ isArchiving ? 'Bezig...' : 'Herstellen' }}
+                </button>
+              }
+            </div>
           </div>
           <p>{{ lead.notes || 'Geen notities toegevoegd.' }}</p>
         } @else {
@@ -485,3 +497,58 @@
     </section>
   }
 </section>
+
+@if (showArchiveModal) {
+  <div class="archive-modal-overlay" (click)="cancelArchive()">
+    <div class="archive-modal" (click)="$event.stopPropagation()">
+      <h3 class="archive-modal__title">Lead archiveren</h3>
+      <p class="archive-modal__text">Ben je zeker dat je deze lead wilt archiveren?</p>
+
+      <label class="archive-modal__label">
+        Reden voor archivering (optioneel)
+        <textarea
+          class="archive-modal__textarea"
+          name="archiveReason"
+          [(ngModel)]="archiveModalReason"
+          rows="3"
+          placeholder="Optionele reden..."
+        ></textarea>
+      </label>
+
+      @if (archiveModalError) {
+        <p class="archive-modal__error">{{ archiveModalError }}</p>
+      }
+
+      <div class="archive-modal__actions">
+        <button class="archive-modal__cancel" type="button" (click)="cancelArchive()" [disabled]="isArchiving">
+          Annuleren
+        </button>
+        <button class="archive-modal__confirm" type="button" (click)="confirmArchive()" [disabled]="isArchiving">
+          {{ isArchiving ? 'Bezig...' : 'Archiveren' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showUnarchiveModal) {
+  <div class="archive-modal-overlay" (click)="cancelUnarchive()">
+    <div class="archive-modal" (click)="$event.stopPropagation()">
+      <h3 class="archive-modal__title">Lead herstellen</h3>
+      <p class="archive-modal__text">Wil je deze lead herstellen? De lead wordt weer zichtbaar als actief.</p>
+
+      @if (archiveModalError) {
+        <p class="archive-modal__error">{{ archiveModalError }}</p>
+      }
+
+      <div class="archive-modal__actions">
+        <button class="archive-modal__cancel" type="button" (click)="cancelUnarchive()" [disabled]="isArchiving">
+          Annuleren
+        </button>
+        <button class="archive-modal__unarchive" type="button" (click)="confirmUnarchive()" [disabled]="isArchiving">
+          {{ isArchiving ? 'Bezig...' : 'Herstellen' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

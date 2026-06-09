@@ -176,6 +176,27 @@
     <p class="leads-page__error">{{ errorMessage }}</p>
   }
 
+  <div class="leads-archive-filter">
+    <button
+      class="leads-archive-filter__btn"
+      [class.leads-archive-filter__btn--active]="archiveFilter === 'active'"
+      type="button"
+      (click)="setArchiveFilter('active')"
+    >Actief</button>
+    <button
+      class="leads-archive-filter__btn"
+      [class.leads-archive-filter__btn--active]="archiveFilter === 'archived'"
+      type="button"
+      (click)="setArchiveFilter('archived')"
+    >Gearchiveerd</button>
+    <button
+      class="leads-archive-filter__btn"
+      [class.leads-archive-filter__btn--active]="archiveFilter === 'all'"
+      type="button"
+      (click)="setArchiveFilter('all')"
+    >Alles</button>
+  </div>
+
   @if (!isLoading && filteredLeads.length === 0) {
     <p>Geen leads gevonden voor deze filter.</p>
   }
@@ -239,6 +260,10 @@
                 <a class="lead-link" [routerLink]="['/leads', lead.id]">
                   {{ lead.companyName }}
                 </a>
+
+                @if (lead.isArchived) {
+                  <span class="archived-badge">Gearchiveerd</span>
+                }
 
                 @if (lead.website) {
                   <span>{{ lead.website }}</span>

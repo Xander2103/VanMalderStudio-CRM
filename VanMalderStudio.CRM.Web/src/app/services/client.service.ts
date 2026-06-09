@@ -26,6 +26,9 @@ export interface Client {
   domainRegistrar?: string | null;
   domainManagementUrl?: string | null;
   domainRenewalDate?: string | null;
+  isArchived: boolean;
+  archivedAt?: string | null;
+  archiveReason?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -88,8 +91,8 @@ export class ClientService {
 
   constructor(private http: HttpClient) {}
 
-  getClients(): Observable<Client[]> {
-    return this.http.get<Client[]>(this.apiUrl);
+  getClients(archiveFilter: 'active' | 'archived' | 'all' = 'active'): Observable<Client[]> {
+    return this.http.get<Client[]>(`${this.apiUrl}?archiveFilter=${archiveFilter}`);
   }
 
   getClient(id: number): Observable<Client> {
@@ -102,6 +105,14 @@ export class ClientService {
 
   updateClient(id: number, client: UpdateClient): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}`, client);
+  }
+
+  archiveClient(id: number, reason: string | null): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/archive`, { reason });
+  }
+
+  unarchiveClient(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/unarchive`, {});
   }
 
   deleteClient(id: number): Observable<void> {

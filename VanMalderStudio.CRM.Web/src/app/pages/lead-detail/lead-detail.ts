@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CreateLeadActivity, Lead, LeadService, UpdateLead } from '../../services/lead.service';
 import { CreateTaskItem, TaskItem, TaskService } from '../../services/task.service';
 
@@ -76,8 +76,15 @@ export class LeadDetail implements OnInit {
     leadId: null
   };
 
+  isArchiving = false;
+  showArchiveModal = false;
+  showUnarchiveModal = false;
+  archiveModalReason = '';
+  archiveModalError = '';
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private leadService: LeadService,
     private taskService: TaskService
   ) {}
@@ -191,6 +198,65 @@ export class LeadDetail implements OnInit {
         this.isSavingEdit = false;
       }
     });
+  }
+
+  archiveLead(): void {
+    if (!this.lead) return;
+    this.archiveModalReason = '';
+    this.archiveModalError = '';
+    this.showArchiveModal = true;
+  }
+
+  confirmArchive(): void {
+    this.isArchiving = true;
+    this.archiveModalError = '';
+
+    this.leadService.archiveLead(this.leadId, this.archiveModalReason.trim() || null).subscribe({
+      next: () => {
+        this.showArchiveModal = false;
+        this.router.navigate(['/leads']);
+      },
+      error: () => {
+        this.archiveModalError = 'Archivering mislukt. Probeer opnieuw.';
+        this.isArchiving = false;
+      }
+    });
+  }
+
+  cancelArchive(): void {
+    if (this.isArchiving) return;
+    this.showArchiveModal = false;
+    this.archiveModalReason = '';
+    this.archiveModalError = '';
+  }
+
+  unarchiveLead(): void {
+    if (!this.lead) return;
+    this.archiveModalError = '';
+    this.showUnarchiveModal = true;
+  }
+
+  confirmUnarchive(): void {
+    this.isArchiving = true;
+    this.archiveModalError = '';
+
+    this.leadService.unarchiveLead(this.leadId).subscribe({
+      next: () => {
+        this.showUnarchiveModal = false;
+        this.isArchiving = false;
+        this.successMessage = 'Lead hersteld.';
+        this.loadLead();
+      },
+      error: () => {
+        this.archiveModalError = 'Herstellen mislukt. Probeer opnieuw.';
+        this.isArchiving = false;
+      }
+    });
+  }
+
+  cancelUnarchive(): void {
+    if (this.isArchiving) return;
+    this.showUnarchiveModal = false;
   }
 
   private toDateInput(iso: string | undefined | null): string {

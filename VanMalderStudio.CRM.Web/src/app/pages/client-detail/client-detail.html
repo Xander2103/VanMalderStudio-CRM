@@ -19,17 +19,27 @@
         </div>
 
         <div class="client-detail-page__header-actions">
-          @if (isEditing) {
-            <button class="cd-btn cd-btn--ghost" type="button" (click)="cancelEdit()" [disabled]="isSaving">
-              Annuleren
-            </button>
-            <button class="cd-btn cd-btn--primary" type="button" (click)="saveEdit()" [disabled]="isSaving">
-              @if (isSaving) { Opslaan... } @else { Opslaan }
+          @if (client.isArchived) {
+            <span class="cd-archived-badge">Gearchiveerd</span>
+            <button class="cd-btn cd-btn--unarchive" type="button" (click)="unarchiveClient()" [disabled]="isArchiving">
+              {{ isArchiving ? 'Bezig...' : 'Herstellen' }}
             </button>
           } @else {
-            <button class="cd-btn cd-btn--secondary" type="button" (click)="startEdit()">
-              Bewerken
-            </button>
+            @if (isEditing) {
+              <button class="cd-btn cd-btn--ghost" type="button" (click)="cancelEdit()" [disabled]="isSaving">
+                Annuleren
+              </button>
+              <button class="cd-btn cd-btn--primary" type="button" (click)="saveEdit()" [disabled]="isSaving">
+                @if (isSaving) { Opslaan... } @else { Opslaan }
+              </button>
+            } @else {
+              <button class="cd-btn cd-btn--secondary" type="button" (click)="startEdit()">
+                Bewerken
+              </button>
+              <button class="cd-btn cd-btn--archive" type="button" (click)="archiveClient()" [disabled]="isArchiving">
+                Archiveren
+              </button>
+            }
           }
         </div>
       </div>
@@ -615,3 +625,58 @@
   }
 
 </section>
+
+@if (showArchiveModal) {
+  <div class="archive-modal-overlay" (click)="cancelArchive()">
+    <div class="archive-modal" (click)="$event.stopPropagation()">
+      <h3 class="archive-modal__title">Klant archiveren</h3>
+      <p class="archive-modal__text">Ben je zeker dat je deze klant wilt archiveren?</p>
+
+      <label class="archive-modal__label">
+        Reden voor archivering (optioneel)
+        <textarea
+          class="archive-modal__textarea"
+          name="archiveReason"
+          [(ngModel)]="archiveModalReason"
+          rows="3"
+          placeholder="Optionele reden..."
+        ></textarea>
+      </label>
+
+      @if (archiveModalError) {
+        <p class="archive-modal__error">{{ archiveModalError }}</p>
+      }
+
+      <div class="archive-modal__actions">
+        <button class="archive-modal__cancel" type="button" (click)="cancelArchive()" [disabled]="isArchiving">
+          Annuleren
+        </button>
+        <button class="archive-modal__confirm" type="button" (click)="confirmArchive()" [disabled]="isArchiving">
+          {{ isArchiving ? 'Bezig...' : 'Archiveren' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showUnarchiveModal) {
+  <div class="archive-modal-overlay" (click)="cancelUnarchive()">
+    <div class="archive-modal" (click)="$event.stopPropagation()">
+      <h3 class="archive-modal__title">Klant herstellen</h3>
+      <p class="archive-modal__text">Wil je deze klant herstellen? De klant wordt weer zichtbaar als actief.</p>
+
+      @if (archiveModalError) {
+        <p class="archive-modal__error">{{ archiveModalError }}</p>
+      }
+
+      <div class="archive-modal__actions">
+        <button class="archive-modal__cancel" type="button" (click)="cancelUnarchive()" [disabled]="isArchiving">
+          Annuleren
+        </button>
+        <button class="archive-modal__unarchive" type="button" (click)="confirmUnarchive()" [disabled]="isArchiving">
+          {{ isArchiving ? 'Bezig...' : 'Herstellen' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

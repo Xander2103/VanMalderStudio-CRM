@@ -170,6 +170,27 @@
     <p class="clients-page__error">{{ errorMessage }}</p>
   }
 
+  <div class="clients-archive-filter">
+    <button
+      class="clients-archive-filter__btn"
+      [class.clients-archive-filter__btn--active]="archiveFilter === 'active'"
+      type="button"
+      (click)="setArchiveFilter('active')"
+    >Actief</button>
+    <button
+      class="clients-archive-filter__btn"
+      [class.clients-archive-filter__btn--active]="archiveFilter === 'archived'"
+      type="button"
+      (click)="setArchiveFilter('archived')"
+    >Gearchiveerd</button>
+    <button
+      class="clients-archive-filter__btn"
+      [class.clients-archive-filter__btn--active]="archiveFilter === 'all'"
+      type="button"
+      (click)="setArchiveFilter('all')"
+    >Alles</button>
+  </div>
+
   <div class="clients-filter-bar">
     <input
       class="clients-filter-bar__search"
@@ -222,6 +243,9 @@
             <tr>
               <td>
                 <a class="client-link client-link--name" [routerLink]="['/clients', client.id]">{{ client.companyName }}</a>
+                @if (client.isArchived) {
+                  <span class="archived-badge">Gearchiveerd</span>
+                }
                 @if (client.website) {
                   <span>
                     <a class="client-link" [href]="client.website" target="_blank" rel="noopener">

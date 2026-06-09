@@ -20,40 +20,51 @@ public class LeadsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<LeadResponseDto>>> GetLeads()
+    public async Task<ActionResult<IEnumerable<LeadResponseDto>>> GetLeads([FromQuery] string? archiveFilter = "active")
     {
-        var leads = await _context.Leads
-            .Include(lead => lead.Activities)
-            .OrderByDescending(lead => lead.CreatedAt)
-            .Select(lead => new LeadResponseDto
+        IQueryable<Lead> query = _context.Leads.Include(l => l.Activities);
+
+        query = archiveFilter switch
+        {
+            "archived" => query.Where(l => l.IsArchived),
+            "all"      => query,
+            _          => query.Where(l => !l.IsArchived)
+        };
+
+        var leads = await query
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => new LeadResponseDto
             {
-                Id = lead.Id,
-                CompanyName = lead.CompanyName,
-                ContactName = lead.ContactName,
-                Email = lead.Email,
-                Phone = lead.Phone,
-                Website = lead.Website,
-                City = lead.City,
-                Source = lead.Source,
-                Status = lead.Status,
-                LastContactAt = lead.LastContactAt,
-                NextFollowUpAt = lead.NextFollowUpAt,
-                Notes = lead.Notes,
-                EstimatedValue = lead.EstimatedValue,
-                ProposalValue = lead.ProposalValue,
-                WinProbability = lead.WinProbability,
-                CreatedAt = lead.CreatedAt,
-                UpdatedAt = lead.UpdatedAt,
-                Activities = lead.Activities
-                    .OrderByDescending(activity => activity.ActivityDate)
-                    .Select(activity => new LeadActivityResponseDto
+                Id = l.Id,
+                CompanyName = l.CompanyName,
+                ContactName = l.ContactName,
+                Email = l.Email,
+                Phone = l.Phone,
+                Website = l.Website,
+                City = l.City,
+                Source = l.Source,
+                Status = l.Status,
+                LastContactAt = l.LastContactAt,
+                NextFollowUpAt = l.NextFollowUpAt,
+                Notes = l.Notes,
+                EstimatedValue = l.EstimatedValue,
+                ProposalValue = l.ProposalValue,
+                WinProbability = l.WinProbability,
+                IsArchived = l.IsArchived,
+                ArchivedAt = l.ArchivedAt,
+                ArchiveReason = l.ArchiveReason,
+                CreatedAt = l.CreatedAt,
+                UpdatedAt = l.UpdatedAt,
+                Activities = l.Activities
+                    .OrderByDescending(a => a.ActivityDate)
+                    .Select(a => new LeadActivityResponseDto
                     {
-                        Id = activity.Id,
-                        LeadId = activity.LeadId,
-                        Type = activity.Type,
-                        Description = activity.Description,
-                        ActivityDate = activity.ActivityDate,
-                        CreatedAt = activity.CreatedAt
+                        Id = a.Id,
+                        LeadId = a.LeadId,
+                        Type = a.Type,
+                        Description = a.Description,
+                        ActivityDate = a.ActivityDate,
+                        CreatedAt = a.CreatedAt
                     })
                     .ToList()
             })
@@ -66,15 +77,13 @@ public class LeadsController : ControllerBase
     public async Task<ActionResult<LeadResponseDto>> GetLead(int id)
     {
         var lead = await _context.Leads
-            .Include(lead => lead.Activities)
-            .FirstOrDefaultAsync(lead => lead.Id == id);
+            .Include(l => l.Activities)
+            .FirstOrDefaultAsync(l => l.Id == id);
 
         if (lead is null)
-        {
             return NotFound();
-        }
 
-        var leadResponse = new LeadResponseDto
+        return Ok(new LeadResponseDto
         {
             Id = lead.Id,
             CompanyName = lead.CompanyName,
@@ -91,33 +100,44 @@ public class LeadsController : ControllerBase
             EstimatedValue = lead.EstimatedValue,
             ProposalValue = lead.ProposalValue,
             WinProbability = lead.WinProbability,
+            IsArchived = lead.IsArchived,
+            ArchivedAt = lead.ArchivedAt,
+            ArchiveReason = lead.ArchiveReason,
             CreatedAt = lead.CreatedAt,
             UpdatedAt = lead.UpdatedAt,
             Activities = lead.Activities
-                .OrderByDescending(activity => activity.ActivityDate)
-                .Select(activity => new LeadActivityResponseDto
+                .OrderByDescending(a => a.ActivityDate)
+                .Select(a => new LeadActivityResponseDto
                 {
-                    Id = activity.Id,
-                    LeadId = activity.LeadId,
-                    Type = activity.Type,
-                    Description = activity.Description,
-                    ActivityDate = activity.ActivityDate,
-                    CreatedAt = activity.CreatedAt
+                    Id = a.Id,
+                    LeadId = a.LeadId,
+                    Type = a.Type,
+                    Description = a.Description,
+                    ActivityDate = a.ActivityDate,
+                    CreatedAt = a.CreatedAt
                 })
                 .ToList()
-        };
-
-        return Ok(leadResponse);
+        });
     }
 
     [HttpPost]
     public async Task<ActionResult<Lead>> CreateLead(CreateLeadDto createLeadDto)
     {
+        var companyName = createLeadDto.CompanyName.Trim();
+        var email = createLeadDto.Email?.Trim();
+
+        if (!string.IsNullOrEmpty(email) &&
+            await _context.Leads.AnyAsync(l => !l.IsArchived && l.Email != null && l.Email.ToLower() == email.ToLower()))
+            return BadRequest(new { message = $"Er bestaat al een lead met e-mailadres '{email}'." });
+
+        if (await _context.Leads.AnyAsync(l => !l.IsArchived && l.CompanyName.ToLower() == companyName.ToLower()))
+            return BadRequest(new { message = $"Er bestaat al een lead met bedrijfsnaam '{companyName}'." });
+
         var lead = new Lead
         {
-            CompanyName = createLeadDto.CompanyName,
+            CompanyName = companyName,
             ContactName = createLeadDto.ContactName,
-            Email = createLeadDto.Email,
+            Email = email,
             Phone = createLeadDto.Phone,
             Website = createLeadDto.Website,
             City = createLeadDto.City,
@@ -144,9 +164,7 @@ public class LeadsController : ControllerBase
         var lead = await _context.Leads.FindAsync(id);
 
         if (lead is null)
-        {
             return NotFound();
-        }
 
         lead.CompanyName = updateLeadDto.CompanyName;
         lead.ContactName = updateLeadDto.ContactName;
@@ -168,15 +186,50 @@ public class LeadsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPut("{id:int}/archive")]
+    public async Task<IActionResult> ArchiveLead(int id, [FromBody] ArchiveDto dto)
+    {
+        var lead = await _context.Leads.FindAsync(id);
+
+        if (lead is null)
+            return NotFound();
+
+        lead.IsArchived = true;
+        lead.ArchivedAt = DateTime.UtcNow;
+        lead.ArchiveReason = dto.Reason;
+        lead.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:int}/unarchive")]
+    public async Task<IActionResult> UnarchiveLead(int id)
+    {
+        var lead = await _context.Leads.FindAsync(id);
+
+        if (lead is null)
+            return NotFound();
+
+        lead.IsArchived = false;
+        lead.ArchivedAt = null;
+        lead.ArchiveReason = null;
+        lead.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteLead(int id)
     {
         var lead = await _context.Leads.FindAsync(id);
 
         if (lead is null)
-        {
             return NotFound();
-        }
 
         _context.Leads.Remove(lead);
         await _context.SaveChangesAsync();
@@ -190,9 +243,7 @@ public class LeadsController : ControllerBase
         var lead = await _context.Leads.FindAsync(id);
 
         if (lead is null)
-        {
             return NotFound();
-        }
 
         var activity = new LeadActivity
         {

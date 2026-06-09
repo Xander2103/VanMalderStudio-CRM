@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, catchError, of } from 'rxjs';
 import { Client, ClientService, UpdateClient } from '../../services/client.service';
@@ -29,6 +29,12 @@ export class ClientDetail implements OnInit {
   editingProjectId: number | null = null;
   isSavingProjectEdit = false;
 
+  isArchiving = false;
+  showArchiveModal = false;
+  showUnarchiveModal = false;
+  archiveModalReason = '';
+  archiveModalError = '';
+
   editForm: UpdateClient = { companyName: '' };
   newProject: CreateClientProject = { clientId: 0, projectName: '', projectType: 1, status: 1 };
   projectEditForm: UpdateClientProject = { projectName: '', projectType: 1, status: 1 };
@@ -42,6 +48,7 @@ export class ClientDetail implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private clientService: ClientService,
     private clientPaymentService: ClientPaymentService,
     private clientProjectService: ClientProjectService
@@ -341,6 +348,70 @@ export class ClientDetail implements OnInit {
       case 6: return 'cd-project-status cd-project-status--cancelled';
       default: return 'cd-project-status';
     }
+  }
+
+  // ── Archive ────────────────────────────────────────────────────────────────
+
+  archiveClient(): void {
+    if (!this.client) return;
+    this.archiveModalReason = '';
+    this.archiveModalError = '';
+    this.showArchiveModal = true;
+  }
+
+  confirmArchive(): void {
+    this.isArchiving = true;
+    this.archiveModalError = '';
+
+    this.clientService.archiveClient(this.clientId, this.archiveModalReason.trim() || null).subscribe({
+      next: () => {
+        this.showArchiveModal = false;
+        this.router.navigate(['/clients']);
+      },
+      error: () => {
+        this.archiveModalError = 'Archivering mislukt. Probeer opnieuw.';
+        this.isArchiving = false;
+      }
+    });
+  }
+
+  cancelArchive(): void {
+    if (this.isArchiving) return;
+    this.showArchiveModal = false;
+    this.archiveModalReason = '';
+    this.archiveModalError = '';
+  }
+
+  unarchiveClient(): void {
+    if (!this.client) return;
+    this.archiveModalError = '';
+    this.showUnarchiveModal = true;
+  }
+
+  confirmUnarchive(): void {
+    this.isArchiving = true;
+    this.archiveModalError = '';
+
+    this.clientService.unarchiveClient(this.clientId).subscribe({
+      next: () => {
+        this.showUnarchiveModal = false;
+        this.isArchiving = false;
+        this.successMessage = 'Klant hersteld.';
+        this.clientService.getClient(this.clientId).subscribe({
+          next: (c) => { this.client = c; },
+          error: () => {}
+        });
+      },
+      error: () => {
+        this.archiveModalError = 'Herstellen mislukt. Probeer opnieuw.';
+        this.isArchiving = false;
+      }
+    });
+  }
+
+  cancelUnarchive(): void {
+    if (this.isArchiving) return;
+    this.showUnarchiveModal = false;
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

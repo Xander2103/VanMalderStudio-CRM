@@ -25,6 +25,10 @@ public class LeadResponseDto
     public decimal? ProposalValue { get; set; }
     public int? WinProbability { get; set; }
 
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+    public string? ArchiveReason { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
