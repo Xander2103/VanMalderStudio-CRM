@@ -408,6 +408,41 @@
   text-decoration: underline;
 }
 
+// ── Action center ────────────────────────────────────────────────────────────
+
+.action-center {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.action-row--overdue {
+  border-color: #ffd6d6;
+  background: #fff8f8;
+
+  &:hover {
+    background: #ffe5e5;
+    border-color: #ffaaaa;
+  }
+}
+
+.action-row--won {
+  border-color: #c8e6c9;
+  background: #f1f8f1;
+
+  &:hover {
+    background: #e8f5e9;
+    border-color: #81c784;
+  }
+}
+
+.payment-amount {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #162033;
+  white-space: nowrap;
+}
+
 // ── Renewal alerts ────────────────────────────────────────────────────────────
 
 .renewal-list {
@@ -509,7 +544,7 @@
   .quick-actions,
   .stats-grid,
   .value-grid,
-  .dashboard-section--split,
+  .action-center,
   .renewal-list {
     grid-template-columns: 1fr;
   }

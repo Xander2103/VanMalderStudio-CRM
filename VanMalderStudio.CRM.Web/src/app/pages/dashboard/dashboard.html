@@ -42,7 +42,199 @@
         <small>Leads met hogere kans op offerte</small>
       </a>
     </section>
+  }
 
+  @if (actions) {
+    <section class="dashboard-section">
+      <div class="section-heading">
+        <div>
+          <p class="dashboard-hero__eyebrow">Actiecentrum</p>
+          <h2>Wat vraagt aandacht</h2>
+        </div>
+      </div>
+
+      <div class="action-center">
+
+        <!-- Vandaag opvolgen -->
+        <article class="focus-panel">
+          <p class="dashboard-hero__eyebrow">Taken</p>
+          <h2>Vandaag opvolgen</h2>
+
+          @if (actions.todayTasks.length === 0) {
+            <p class="action-empty">Niets dringend.</p>
+          } @else {
+            <div class="action-list">
+              @for (task of actions.todayTasks; track task.id) {
+                <a routerLink="/tasks" class="action-row">
+                  <div class="action-row__body">
+                    <strong>{{ task.title }}</strong>
+                    @if (task.leadCompanyName) {
+                      <span class="action-row__sub">{{ task.leadCompanyName }}</span>
+                    }
+                  </div>
+                  <div class="action-row__aside">
+                    <span [class]="getTaskPriorityClass(task.priority)">
+                      {{ getTaskPriorityLabel(task.priority) }}
+                    </span>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+
+          <a routerLink="/tasks" class="action-footer-link">Alle taken →</a>
+        </article>
+
+        <!-- Te laat -->
+        <article class="focus-panel">
+          <p class="dashboard-hero__eyebrow">Achterstallig</p>
+          <h2>Te laat</h2>
+
+          @if (actions.overdueTasks.length === 0) {
+            <p class="action-empty">Niets dringend.</p>
+          } @else {
+            <div class="action-list">
+              @for (task of actions.overdueTasks; track task.id) {
+                <a routerLink="/tasks" class="action-row action-row--overdue">
+                  <div class="action-row__body">
+                    <strong>{{ task.title }}</strong>
+                    @if (task.leadCompanyName) {
+                      <span class="action-row__sub">{{ task.leadCompanyName }}</span>
+                    }
+                  </div>
+                  <div class="action-row__aside">
+                    <span [class]="getTaskPriorityClass(task.priority)">
+                      {{ getTaskPriorityLabel(task.priority) }}
+                    </span>
+                    <time>{{ formatDate(task.dueDate) }}</time>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+
+          <a routerLink="/tasks" class="action-footer-link">Alle taken →</a>
+        </article>
+
+        <!-- Betalingen -->
+        <article class="focus-panel">
+          <p class="dashboard-hero__eyebrow">Financieel</p>
+          <h2>Betalingen</h2>
+
+          @if (actions.overduePayments.length === 0) {
+            <p class="action-empty">Niets dringend.</p>
+          } @else {
+            <div class="action-list">
+              @for (payment of actions.overduePayments; track payment.clientId + '-' + payment.month + '-' + payment.year) {
+                <a [routerLink]="['/clients', payment.clientId]" class="action-row action-row--overdue">
+                  <div class="action-row__body">
+                    <strong>{{ payment.companyName }}</strong>
+                    <span class="action-row__sub">{{ monthName(payment.month) }} {{ payment.year }}</span>
+                  </div>
+                  <div class="action-row__aside">
+                    <span class="payment-amount">{{ formatEuro(payment.amount) }}</span>
+                    <time>{{ formatDate(payment.dueDate) }}</time>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+
+          <a routerLink="/clients" class="action-footer-link">Alle klanten →</a>
+        </article>
+
+        <!-- Vernieuwingen -->
+        <article class="focus-panel">
+          <p class="dashboard-hero__eyebrow">Beheer</p>
+          <h2>Vernieuwingen</h2>
+
+          @if (actions.upcomingRenewals.length === 0) {
+            <p class="action-empty">Geen vervaldatums binnen 30 dagen.</p>
+          } @else {
+            <div class="action-list">
+              @for (alert of actions.upcomingRenewals; track alert.clientId + alert.type) {
+                <a [routerLink]="['/clients', alert.clientId]" class="action-row">
+                  <div class="action-row__body">
+                    <strong>{{ alert.companyName }}</strong>
+                    <span class="action-row__sub">{{ alert.label }}</span>
+                  </div>
+                  <div class="action-row__aside">
+                    <span [class]="alert.type === 'Hosting' ? 'renewal-badge renewal-badge--hosting' : 'renewal-badge renewal-badge--domain'">
+                      {{ alert.type }}
+                    </span>
+                    <span [class]="alert.daysRemaining <= 7 ? 'renewal-days renewal-days--urgent' : 'renewal-days'">
+                      {{ alert.daysRemaining }} dag{{ alert.daysRemaining === 1 ? '' : 'en' }}
+                    </span>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+
+          <a routerLink="/clients" class="action-footer-link">Alle klanten →</a>
+        </article>
+
+        <!-- Warme leads zonder taak -->
+        <article class="focus-panel">
+          <p class="dashboard-hero__eyebrow">Leads</p>
+          <h2>Warme leads zonder taak</h2>
+
+          @if (actions.warmLeadsWithoutTask.length === 0) {
+            <p class="action-empty">Alle warme leads hebben een openstaande taak.</p>
+          } @else {
+            <div class="action-list">
+              @for (lead of actions.warmLeadsWithoutTask; track lead.id) {
+                <a [routerLink]="['/leads', lead.id]" class="action-row">
+                  <div class="action-row__body">
+                    <strong>{{ lead.companyName }}</strong>
+                    @if (lead.contactName) {
+                      <span class="action-row__sub">{{ lead.contactName }}</span>
+                    }
+                  </div>
+                  <div class="action-row__aside">
+                    <span class="action-status-pill">{{ getLeadStatusLabel(lead.status) }}</span>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+
+          <a routerLink="/leads" class="action-footer-link">Alle leads →</a>
+        </article>
+
+        <!-- Recent gewonnen -->
+        <article class="focus-panel">
+          <p class="dashboard-hero__eyebrow">Successen</p>
+          <h2>Recent gewonnen</h2>
+
+          @if (actions.recentlyWonLeads.length === 0) {
+            <p class="action-empty">Nog geen gewonnen leads.</p>
+          } @else {
+            <div class="action-list">
+              @for (lead of actions.recentlyWonLeads; track lead.id) {
+                <a [routerLink]="['/leads', lead.id]" class="action-row action-row--won">
+                  <div class="action-row__body">
+                    <strong>{{ lead.companyName }}</strong>
+                    @if (lead.contactName) {
+                      <span class="action-row__sub">{{ lead.contactName }}</span>
+                    }
+                  </div>
+                  <div class="action-row__aside">
+                    <time>{{ formatDate(lead.updatedAt) }}</time>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+
+          <a routerLink="/leads" class="action-footer-link">Gewonnen leads →</a>
+        </article>
+
+      </div>
+    </section>
+  }
+
+  @if (summary) {
     <section class="dashboard-section">
       <div class="section-heading">
         <div>
@@ -58,71 +250,43 @@
           <small>Alle prospects in je CRM</small>
         </a>
 
-        <a
-          routerLink="/leads"
-          [queryParams]="{ status: 1 }"
-          class="stat-card"
-        >
+        <a routerLink="/leads" [queryParams]="{ status: 1 }" class="stat-card">
           <span>Nieuwe leads</span>
           <strong>{{ summary.newLeads }}</strong>
           <small>Nog niet opgevolgd</small>
         </a>
 
-        <a
-          routerLink="/leads"
-          [queryParams]="{ status: 2 }"
-          class="stat-card"
-        >
+        <a routerLink="/leads" [queryParams]="{ status: 2 }" class="stat-card">
           <span>Niet opgenomen</span>
           <strong>{{ summary.calledNoAnswerLeads }}</strong>
           <small>Opnieuw bellen</small>
         </a>
 
-        <a
-          routerLink="/leads"
-          [queryParams]="{ status: 4 }"
-          class="stat-card"
-        >
+        <a routerLink="/leads" [queryParams]="{ status: 4 }" class="stat-card">
           <span>Geïnteresseerd</span>
           <strong>{{ summary.interestedLeads }}</strong>
           <small>Warme leads</small>
         </a>
 
-        <a
-          routerLink="/leads"
-          [queryParams]="{ status: 6 }"
-          class="stat-card"
-        >
+        <a routerLink="/leads" [queryParams]="{ status: 6 }" class="stat-card">
           <span>Offerte gevraagd</span>
           <strong>{{ summary.proposalRequestedLeads }}</strong>
           <small>Offerte voorbereiden</small>
         </a>
 
-        <a
-          routerLink="/leads"
-          [queryParams]="{ status: 7 }"
-          class="stat-card"
-        >
+        <a routerLink="/leads" [queryParams]="{ status: 7 }" class="stat-card">
           <span>Offerte verstuurd</span>
           <strong>{{ summary.proposalSentLeads }}</strong>
           <small>Opvolgen</small>
         </a>
 
-        <a
-          routerLink="/leads"
-          [queryParams]="{ status: 8 }"
-          class="stat-card"
-        >
+        <a routerLink="/leads" [queryParams]="{ status: 8 }" class="stat-card">
           <span>Gewonnen</span>
           <strong>{{ summary.wonLeads }}</strong>
           <small>Nieuwe klanten</small>
         </a>
 
-        <a
-          routerLink="/leads"
-          [queryParams]="{ status: 9 }"
-          class="stat-card"
-        >
+        <a routerLink="/leads" [queryParams]="{ status: 9 }" class="stat-card">
           <span>Verloren</span>
           <strong>{{ summary.lostLeads }}</strong>
           <small>Niet geconverteerd</small>
@@ -163,108 +327,6 @@
           <small>Bevestigde omzet</small>
         </div>
       </div>
-    </section>
-
-    <section class="dashboard-section dashboard-section--split">
-      <article class="focus-panel">
-        <p class="dashboard-hero__eyebrow">Taken</p>
-        <h2>Vandaag opvolgen</h2>
-
-        @if (dueTodayTasks.length === 0) {
-          <p class="action-empty">Geen vervallen taken voor vandaag.</p>
-        }
-
-        @if (dueTodayTasks.length > 0) {
-          <div class="action-list">
-            @for (task of dueTodayTasks; track task.id) {
-              <a routerLink="/tasks" class="action-row">
-                <div class="action-row__body">
-                  <strong>{{ task.title }}</strong>
-                  @if (task.leadCompanyName) {
-                    <span class="action-row__sub">{{ task.leadCompanyName }}</span>
-                  }
-                </div>
-                <div class="action-row__aside">
-                  <span [class]="getTaskPriorityClass(task.priority)">
-                    {{ getTaskPriorityLabel(task.priority) }}
-                  </span>
-                  <time>{{ formatDate(task.dueDate) }}</time>
-                </div>
-              </a>
-            }
-          </div>
-        }
-
-        <a routerLink="/tasks" class="action-footer-link">Alle taken bekijken →</a>
-      </article>
-
-      <article class="focus-panel">
-        <p class="dashboard-hero__eyebrow">Leads</p>
-        <h2>Warme leads</h2>
-
-        @if (warmLeads.length === 0) {
-          <p class="action-empty">Geen warme leads op dit moment.</p>
-        }
-
-        @if (warmLeads.length > 0) {
-          <div class="action-list">
-            @for (lead of warmLeads; track lead.id) {
-              <a [routerLink]="['/leads', lead.id]" class="action-row">
-                <div class="action-row__body">
-                  <strong>{{ lead.companyName }}</strong>
-                  @if (lead.contactName) {
-                    <span class="action-row__sub">{{ lead.contactName }}</span>
-                  }
-                </div>
-                <div class="action-row__aside">
-                  <span class="action-status-pill">
-                    {{ getLeadStatusLabel(lead.status) }}
-                  </span>
-                </div>
-              </a>
-            }
-          </div>
-        }
-
-        <a routerLink="/leads" class="action-footer-link">Alle leads bekijken →</a>
-      </article>
-    </section>
-
-    <section class="dashboard-section">
-      <div class="section-heading">
-        <div>
-          <p class="dashboard-hero__eyebrow">Beheer</p>
-          <h2>Vervalt binnenkort</h2>
-        </div>
-      </div>
-
-      @if (renewalAlerts.length === 0) {
-        <p class="action-empty">Geen vervaldatums binnen 30 dagen.</p>
-      }
-
-      @if (renewalAlerts.length > 0) {
-        <div class="renewal-list">
-          @for (alert of renewalAlerts; track $index) {
-            <a [routerLink]="['/clients', alert.clientId]" class="renewal-row">
-              <div class="renewal-row__body">
-                <strong>{{ alert.companyName }}</strong>
-                <span class="renewal-row__label">{{ alert.label }}</span>
-              </div>
-              <div class="renewal-row__aside">
-                <span [class]="alert.type === 'Hosting' ? 'renewal-badge renewal-badge--hosting' : 'renewal-badge renewal-badge--domain'">
-                  {{ alert.type }}
-                </span>
-                <time>{{ formatDate(alert.renewalDate) }}</time>
-                <span [class]="alert.daysRemaining <= 7 ? 'renewal-days renewal-days--urgent' : 'renewal-days'">
-                  {{ alert.daysRemaining }} dag{{ alert.daysRemaining === 1 ? '' : 'en' }}
-                </span>
-              </div>
-            </a>
-          }
-        </div>
-      }
-
-      <a routerLink="/clients" class="action-footer-link">Alle klanten bekijken →</a>
     </section>
   }
 </section>

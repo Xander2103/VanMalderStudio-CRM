@@ -2,19 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { DashboardService, DashboardSummary } from '../../services/dashboard.service';
+import { DashboardActions, DashboardService, DashboardSummary } from '../../services/dashboard.service';
 import { Lead, LeadService } from '../../services/lead.service';
-import { TaskItem, TaskService } from '../../services/task.service';
-import { Client, ClientService } from '../../services/client.service';
-
-interface RenewalAlert {
-  clientId: number;
-  companyName: string;
-  type: 'Hosting' | 'Domein';
-  label: string;
-  renewalDate: string;
-  daysRemaining: number;
-}
 
 @Component({
   selector: 'app-dashboard',
@@ -24,9 +13,7 @@ interface RenewalAlert {
 })
 export class Dashboard implements OnInit {
   summary?: DashboardSummary;
-  dueTodayTasks: TaskItem[] = [];
-  warmLeads: Lead[] = [];
-  renewalAlerts: RenewalAlert[] = [];
+  actions?: DashboardActions;
 
   openPipelineValue = 0;
   proposalSentValue = 0;
@@ -38,49 +25,31 @@ export class Dashboard implements OnInit {
 
   constructor(
     private dashboardService: DashboardService,
-    private leadService: LeadService,
-    private taskService: TaskService,
-    private clientService: ClientService
+    private leadService: LeadService
   ) {}
 
   ngOnInit(): void {
     forkJoin({
       summary: this.dashboardService.getSummary(),
-      tasks: this.taskService.getTasks().pipe(catchError(() => of([]))),
-      leads: this.leadService.getLeads().pipe(catchError(() => of([]))),
-      clients: this.clientService.getClients().pipe(catchError(() => of([] as Client[])))
+      actions: this.dashboardService.getActions(),
+      leads: this.leadService.getLeads('all').pipe(catchError(() => of([] as Lead[])))
     }).subscribe({
       next: (data) => {
         this.summary = data.summary;
+        this.actions = data.actions;
 
-        const endOfToday = new Date();
-        endOfToday.setHours(23, 59, 59, 999);
-
-        this.dueTodayTasks = data.tasks
-          .filter((t) =>
-            (t.status === 1 || t.status === 2) &&
-            t.dueDate != null &&
-            new Date(t.dueDate) <= endOfToday
-          )
-          .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
-          .slice(0, 5);
-
-        this.warmLeads = data.leads
-          .filter((l) => l.status === 4 || l.status === 6 || l.status === 7)
-          .slice(0, 5);
-
-        const activeLeads = data.leads.filter((l) => l.status !== 8 && l.status !== 9);
+        const activeLeads = data.leads.filter((l) => l.status !== 8 && l.status !== 9 && !l.isArchived);
 
         this.openPipelineValue = activeLeads.reduce((sum, l) => {
           return sum + (l.proposalValue ?? l.estimatedValue ?? 0);
         }, 0);
 
         this.proposalSentValue = data.leads
-          .filter((l) => l.status === 7)
+          .filter((l) => l.status === 7 && !l.isArchived)
           .reduce((sum, l) => sum + (l.proposalValue ?? 0), 0);
 
         this.wonValue = data.leads
-          .filter((l) => l.status === 8)
+          .filter((l) => l.status === 8 && !l.isArchived)
           .reduce((sum, l) => sum + (l.proposalValue ?? l.estimatedValue ?? 0), 0);
 
         this.weightedPipelineValue = activeLeads.reduce((sum, l) => {
@@ -88,47 +57,6 @@ export class Dashboard implements OnInit {
           const prob = l.winProbability != null ? l.winProbability / 100 : 1;
           return sum + value * prob;
         }, 0);
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const cutoff = new Date(today);
-        cutoff.setDate(cutoff.getDate() + 30);
-
-        const alerts: RenewalAlert[] = [];
-        for (const client of data.clients) {
-          if (client.hostingRenewalDate) {
-            const d = new Date(client.hostingRenewalDate);
-            d.setHours(0, 0, 0, 0);
-            if (d >= today && d <= cutoff) {
-              alerts.push({
-                clientId: client.id,
-                companyName: client.companyName,
-                type: 'Hosting',
-                label: client.hostingProvider || 'Hosting',
-                renewalDate: client.hostingRenewalDate,
-                daysRemaining: Math.round((d.getTime() - today.getTime()) / 86400000)
-              });
-            }
-          }
-          if (client.domainRenewalDate) {
-            const d = new Date(client.domainRenewalDate);
-            d.setHours(0, 0, 0, 0);
-            if (d >= today && d <= cutoff) {
-              alerts.push({
-                clientId: client.id,
-                companyName: client.companyName,
-                type: 'Domein',
-                label: client.domainName || 'Domein',
-                renewalDate: client.domainRenewalDate,
-                daysRemaining: Math.round((d.getTime() - today.getTime()) / 86400000)
-              });
-            }
-          }
-        }
-
-        this.renewalAlerts = alerts
-          .sort((a, b) => new Date(a.renewalDate).getTime() - new Date(b.renewalDate).getTime())
-          .slice(0, 6);
 
         this.isLoading = false;
       },
@@ -141,9 +69,15 @@ export class Dashboard implements OnInit {
 
   getLeadStatusLabel(status: number): string {
     switch (status) {
+      case 1: return 'Nieuw';
+      case 2: return 'Gebeld - niet opgenomen';
+      case 3: return 'Later terugbellen';
       case 4: return 'Geïnteresseerd';
+      case 5: return 'Niet geïnteresseerd';
       case 6: return 'Offerte gevraagd';
       case 7: return 'Offerte verstuurd';
+      case 8: return 'Gewonnen';
+      case 9: return 'Verloren';
       default: return 'Onbekend';
     }
   }
@@ -184,5 +118,9 @@ export class Dashboard implements OnInit {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
+  }
+
+  monthName(month: number): string {
+    return new Date(2000, month - 1, 1).toLocaleDateString('nl-BE', { month: 'long' });
   }
 }
